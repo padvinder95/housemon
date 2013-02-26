@@ -62,11 +62,6 @@ else
   # see http://www.senchalabs.org/connect/middleware-logger.html
   ss.http.middleware.prepend ss.http.connect.logger 'dev'
 
-# TODO node 0.8.20, see https://github.com/socketstream/socketstream/issues/354
-ss.http.middleware.prepend (req, res, next) ->
-  res.on 'error', (err) -> console.log 'http error', err
-  next()
-
 # support uploads, this will generate an 'upload' event with details
 # TODO clean up files if this was not done by any event handlers
 require('fs').mkdir './uploads'
