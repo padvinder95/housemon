@@ -10,3 +10,4 @@
 /uploads/*
 /README.md
 /nohup.*
+/dump.rdb
