@@ -56,7 +56,7 @@ exports.rf12devices =
 # these map incoming sensor identifiers to locations in the house (in Dutch)
 exports.locations =
   'RF12:5:2': title: 'boekenkast JC'
-  'RF12:5:3': title: 'buro JC'
+  #'RF12:5:3': title: 'buro JC'
   'RF12:5:4': title: 'washok'
   'RF12:5:5': title: 'woonkamer'
   'RF12:5:6': title: 'hal vloer'
@@ -75,6 +75,8 @@ exports.locations =
 
   'RF12:100:1': title: 'test location'
 
+  'BATT-0': title: 'buro JC'
+  'BATT-1': title: 'coin cell test'
   'DCF77': title: 'radioklok'
   'KS300': title: 'weerstation'
   'S300-1': title: 'vlonder'
