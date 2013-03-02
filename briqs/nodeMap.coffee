@@ -77,6 +77,7 @@ exports.locations =
 
   'BATT-0': title: 'buro JC'
   'BATT-1': title: 'coin cell test'
+  'BATT-2': title: 'penlight test'
   'DCF77': title: 'radioklok'
   'KS300': title: 'weerstation'
   'S300-1': title: 'vlonder'
