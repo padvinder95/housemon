@@ -38,7 +38,7 @@ ss.session.store.use 'redis', local.redisConfig
 collections = ['bobs','readings','locations','drivers','uploads','status']
 state.setupStorage collections, local.redisConfig, ->
   # set up download areas defined in any of the installed briqs
-  for id, bob of  state.models.bobs
+  for id, bob of state.models.bobs
     briq = state.models.briqs[bob.briq_id]
     for route, dir of briq?.info.downloads
       console.log 'downloads', route, dir
