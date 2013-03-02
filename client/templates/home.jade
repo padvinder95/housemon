@@ -1,18 +1,17 @@
 .row
   .seven.columns
     h4 {{pkg.description}}
-    hr
-    //- TODO: tedious, should use Markdown
-    p
-      | To run a quick demo, go to the
-      b: a(href='admin')  Admin
-      |  page and click on the "rf12replay" and "drivers" items in the
-      | list of Briqs, and click on "Install" to activate them both on the
-      | server. This starts generating simulated RF12 packet receptions.
-      | Then install "status" and "jcw-staticdata" and go to the
-      b: a(href='status')  Status
-      |  page to see real-time updates.
-    p: i That's all there is for now – please check the
-      b: a(href='http://jeelabs.org/tag/housemon/')  weblog
-      |  for the latest news.
-    hr
+    :markdown
+      ----
+
+      To run a quick demo, go to the **[Admin](admin)** page and click on the
+      "rf12replay" and "drivers" items in the list of Briqs, and click on
+      "Install" to activate them both on the server. This starts generating
+      simulated RF12 packet receptions.  Then install "status" and
+      "jcw-staticdata" and go to the **[Status](status)** to see real-time
+      updates.
+
+      _That's all there is for now – please check the
+      **[weblog](http://jeelabs.org/tag/housemon/)** for the latest news._
+
+      ----
