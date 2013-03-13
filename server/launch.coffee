@@ -64,7 +64,7 @@ else
 
 # support uploads, this will generate an 'upload' event with details
 # TODO clean up files if this was not done by any event handlers
-require('fs').mkdir './uploads'
+require('fs').mkdir './uploads', ->
 ss.http.middleware.prepend ss.http.connect.bodyParser
   uploadDir: './uploads'
 ss.http.middleware.prepend (req, res, next) ->
