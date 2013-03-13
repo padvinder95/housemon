@@ -74,7 +74,7 @@ for it. The other fields are optional:
 * **factor** - a scale factor to be applied to the reading (default 1.0)
 * **scale** - numeric scaling: >= 0 is number of decimals, < 0 to add zeroes
 
-## Important note
+## Integer resolution
 
 Note that decoded values should be returned as **integers**, because internally
 all readings are passed around and stored in signed int format (up to 32 bits).
@@ -83,6 +83,20 @@ the server (which might be a very low-power Linux box without hardware FP), but
 also because integers are better suited for keeping track of the precision of
 a reading. So the value "1000" with scale 2 represents the value "10.00", not
 "10", "10.0", or "10.000". Some people care about such distinctions!
+
+The idea behind int values, with the "factor" and "scale" options is as follows:
+
+* When you read out a temperature, knowing its precision can be important - i.e.
+  whether the sensor can measure 9.0, 9.1, 9.2, ... or only 9, 10, 11, ... °C.
+  The way to deal with this is to maintain precision in the basic results and
+  then store values as integers, to be scaled and adjusted for display *later*.
+* Let's say a light reading comes in as a 0..255 value, then that's what should
+  be returned by the decoder, stored in the "readings" table, archived, etc.
+* If you would like to see this displayed as a percentage 0..100, then the way
+  to specify this is to set the "factor" option to the expression "100 / 255".
+* The "scale" option can be used to adjust the decimal point: with a scale of 2,
+  a 0..100 value will end up as "0.00 .. 1.00", i.e. two decimals are implied.
+  With a negative scale, extra zero's get added, so -1 will show as "0 .. 1000".
 
 If you truly, really _cannot_ avoid floating point, then here is a work-around:
 return two different parameters in the reading, one representing the mantissa
