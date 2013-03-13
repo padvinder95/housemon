@@ -29,17 +29,20 @@ packetListener = (packet, ainfo) ->
   if name
     decoder = decoders[name]
     if decoder
-      decoder.decode packet.buffer, (info) ->
-        if info.tag
-          name = info.tag
-          delete info.tag
-        info.key = "RF12:#{packet.group}:#{packet.id}.#{name}"
-        now = Date.now()
-        time = packet.time or now
-        if time < 86400000
-          time += now - now % 86400000
-        info.time = time
-        state.store 'readings', info
+      try # recover from a decoder failure
+        decoder.decode packet.buffer, (info) ->
+          if info.tag
+            name = info.tag
+            delete info.tag
+          info.key = "RF12:#{packet.group}:#{packet.id}.#{name}"
+          now = Date.now()
+          time = packet.time or now
+          if time < 86400000
+            time += now - now % 86400000
+          info.time = time
+          state.store 'readings', info
+      catch err # TODO report the failure to the client
+        console.error name, packet, err
   else
     console.info 'raw', packet
         
