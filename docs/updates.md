@@ -27,7 +27,9 @@ For more substantial updates, there may be more work involved:
 
 * **node.js** - If you need to install a new version of Node.js, then you'll
   have to go through the same steps as you did for initial setup, including
-  downloading and possibly even re-compiling it from scratch.
+  downloading and possibly even re-compiling it from scratch. On the mac, do:
+
+        brew update && brew upgrade
 
 * **npm** - This is now part of Node.js, so npm updates should normally be done
   in the same way, and at the same time as Node.js itself.
