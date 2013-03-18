@@ -13,7 +13,7 @@ exports.info =
 
 state = require '../server/state'
 fs = require 'fs'
-child_process = require 'child_process'
+{spawn} = require 'child_process'
 ss = require 'socketstream'
 
 # TODO hardcoded paths for now
@@ -28,7 +28,7 @@ ss.api.add 'compile', (path, cb) ->
   wr = fs.createWriteStream "#{SKETCHDIR}/sketch.ino"
   fs.createReadStream(path).pipe wr
   wr.on 'close', ->
-    make = child_process.spawn 'make', ['upload'], cwd: SKETCHDIR
+    make = spawn 'make', ['upload'], cwd: SKETCHDIR
     make.stdout.on 'data', (data) ->
       ss.api.publish.all 'ss-output', 'stdout', "#{data}"
     make.stderr.on 'data', (data) ->
