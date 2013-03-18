@@ -3,7 +3,11 @@
 ss = require 'socketstream'
 fs = require 'fs'
 
-installedBriqs = {}
+# see https://github.com/socketstream/socketstream/issues/362
+ss.api.remove = (name) ->
+  delete ss.api[name]
+
+installed = {}
 
 module.exports = (state) ->
   
@@ -11,19 +15,20 @@ module.exports = (state) ->
     if obj?
       briq = state.models.briqs[obj.briq_id]
       if briq?
+        console.info 'install briq', obj.key
+        installed[obj.key] = info: briq.info
         if briq.factory
-          console.info 'install briq', obj.key
           args = obj.key.split(':').slice 1
-          installedBriqs[obj.key] = new briq.factory(args...)
-        if briq.info.rpcs
-          ss.api.add name, briq[name]  for name in briq.info.rpcs
+          installed[obj.key].bob = new briq.factory(args...)
+        ss.api.add name, briq[name]  for name in briq.info.rpcs ? []
 
     else
-      briq = installedBriqs[oldObj.key]
-      if briq?
+      orig = installed[oldObj.key]
+      if orig?
         console.info 'uninstall briq', oldObj.key
-        briq.destroy?()
-        delete installedBriqs[oldObj.key]
+        ss.api.remove name  for name in orig.info.rpcs ? []
+        orig.bob?.destroy?()
+        delete installed[oldObj.key]
 
   loadFile = (filename) ->
     loaded = require "../briqs/#{filename}"

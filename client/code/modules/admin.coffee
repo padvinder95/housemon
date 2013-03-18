@@ -28,7 +28,8 @@ module.exports = (ng) ->
 
       briqAndBob = (briq, bob) ->
         # if briq no longer exists, make sure we can still delete this object
-        $scope.briq = briq ? info: {}
+        briq = info: {}  if not briq and bob
+        $scope.briq = briq
         $scope.bob = bob
         if briq?.info?.connections?
           $scope.feeds = briq.info.connections.feeds
