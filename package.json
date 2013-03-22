@@ -6,7 +6,7 @@
   "author": "Jean-Claude Wippler <jc@wippler.nl>",
   "private": true,
   "engines": {
-    "node": ">= 0.8.0"
+    "node": ">= 0.10.0"
   },
   "main": "app.js",
   "dependencies": {
@@ -16,7 +16,7 @@
     "ss-jade": "~0.1.3",
     "ss-stylus": "~0.1.5",
     "ss-console": "~0.1.3",
-    "serialport": "git://github.com/voodootikigod/node-serialport.git",
+    "serialport": "~1.1.0",
     "underscore": "~1.4.3",
     "redis": "~0.8.2",
     "eventemitter2": "~0.4.11",
