@@ -16,11 +16,20 @@ module.exports = (state) ->
       briq = state.models.briqs[obj.briq_id]
       if briq?
         console.info 'install briq', obj.key
-        installed[obj.key] = info: briq.info
-        if briq.factory
-          args = obj.key.split(':').slice 1
-          installed[obj.key].bob = new briq.factory(args...)
         ss.api.add name, briq[name]  for name in briq.info.rpcs ? []
+        # TODO nasty: the incoming obj is only used to copy some settings from
+        # the actually installed bob is created using the briq's factory method
+        installed[obj.key] ?= {}
+        installed[obj.key].info = briq.info
+        if briq.factory
+          bob = installed[obj.key].bob
+          unless bob
+            args = obj.key.split(':').slice 1
+            bob = new briq.factory(args...)
+            installed[obj.key].bob = bob
+          for k,v of briq.info.settings
+            bob[k] = obj[k] ? v.default ? ''
+          bob.inited?()
 
     else
       orig = installed[oldObj.key]
