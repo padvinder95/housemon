@@ -72,4 +72,9 @@ module.exports = (ng) ->
 
       $scope.showAll = ->
         briqAndBob null
+
+      # save changed settings in the bob on the server
+      $scope.changed = _.debounce ->
+        $scope.bobs.store $scope.bob
+      , 500
   ]

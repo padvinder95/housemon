@@ -50,6 +50,16 @@
                                value='Remove'
                                ng-click='removeBob()'
                                ng-show='bob')
+
+      .row(ng-show='bob',ng-repeat='(name,setting) in briq.info.settings')
+        .five.columns
+          label.right.inline {{setting.title}}:
+        .seven.columns
+          input.four(type='text'
+                     ng-model='bob[name]'
+                     ng-change='changed()'
+                     placeholder='{{setting.default}}')
+
       .row(ng-show='feeds || results')
         .two.columns
         .three.columns
