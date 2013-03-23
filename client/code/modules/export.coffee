@@ -14,30 +14,46 @@ module.exports = (ng) ->
           keyMap = data  if status is 200
 
       $scope.setSelection = (key) ->
-        # FIXME hardcoded segment number
-        segment = 370
         $scope.selection = key
         $scope.results = ''
+        segment = 370 # FIXME hardcoded segment number
+
         archId = keyMap[key]
-        request =
-          method: 'GET'
-          url: "/archive/p#{segment}/p#{segment}-#{archId}.dat"
-          responseType: 'arraybuffer'
-        $http(request)
-          .success (data, status, headers, config) ->
-            console.log key, archId, status, typeof data
-            $scope.results = decodeArchiveData segment, new Int32Array data
+        if archId
+          request =
+            method: 'GET'
+            url: "/archive/p#{segment}/p#{segment}-#{archId}.dat"
+            responseType: 'arraybuffer'
+          # fetch the raw data file from the server
+          $http(request)
+            .success (data, status, headers, config) ->
+              console.log key, archId, status, data.byteLength
+              if status is 200
+                $scope.results = decodeArchiveData 1024 * segment, data
   ]
 
-decodeArchiveData = (segment, array) ->
+# convert the rav data to a list of CSV values
+decodeArchiveData = (hours, data) ->
   result = []
+  array = new Int32Array data
   for i in [0...array.length] by 5
-    time = segment + i # TODO wrong value
     cnt = array[i]
     if cnt
       mean = array[i+1]
       min = array[i+2]
       max = array[i+3]
       sdev = array[i+4]
+      time = exportDate hours
       result.push [time ,cnt, mean, min, max, sdev].join ','
+    hours += 1
   result.join '\n'
+
+# the time is exported as a 10-digit integer: YYYYMMDDHH
+exportDate = (hours) ->
+  date = new Date(hours * 3600000)
+  y = date.getUTCFullYear()
+  m = date.getUTCMonth() + 1
+  d = date.getUTCDate()
+  h = date.getUTCHours()
+  ((y * 100 + m) * 100 + d) * 100 + h
+
