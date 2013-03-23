@@ -4,7 +4,9 @@
     .row
       .eight.columns
         h3 Graphs 
-          input(ng-model='hours',placeholder='1.0 hour')
+          input(ng-model='hours'
+                ng-change='hoursChanged()'
+                placeholder='1.0 hour')
         #chart
 
       .four.columns

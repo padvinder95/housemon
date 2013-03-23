@@ -7,10 +7,12 @@ module.exports = (ng) ->
     ($scope, rpc) ->
 
       selection = {}
+      lastKey = null # TODO temp, to make redraw on hours change work
 
       $scope.setGraph = (key) ->
         selection = {}
         selection[key] = true
+        lastKey = key
 
         period = ($scope.hours or 1) * 3600000
         promise = rpc.exec 'host.api', 'rawRange', key, -period, 0
@@ -58,6 +60,10 @@ module.exports = (ng) ->
       $scope.$on 'set.status', (event, obj, oldObj) ->
         # TODO works ok, but does a very inefficient full fetch on each change!
         $scope.setGraph obj.key  if selection[obj.key]
+
+      $scope.hoursChanged = _.debounce ->
+        $scope.setGraph lastKey
+      , 500
   ]
 
 myFormatter = (obj) ->
