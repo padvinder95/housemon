@@ -3,12 +3,14 @@
     h3 Export
     div
       span Starting point: 
-      input(ng-model='start',placeholder='1',size=4)
+      input(ng-model='start',,size=4)
       span  days ago.
-    div The export will include values up to one hour ago.
+    div The export will include values up to the last archived hour.
+    p: i To export, click on a parameter in the list on the right.
     div(ng-show='selection')
       h6 {{selection}}
-      hr
+      p(ng-hide='results'): i No data
+      p(ng-show='results') time,count,mean,min,max,sdev
       pre {{results}}
   .four.columns
     input(type='text',ng-model='query',placeholder='Search...')
