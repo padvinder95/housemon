@@ -8,8 +8,9 @@ module.exports = (ng) ->
 
       $scope.routes = routes
 
-      # reload app for any change in the bobs collection, to update the menus
-      $scope.$on 'set.bobs', -> window.location.reload true
+      # reload app for any add/del in the bobs collection, to update the menus
+      $scope.$on 'set.bobs', (event, obj, oldObj) ->
+        window.location.reload true  if not obj?.key or not oldObj?.key
 
       # pick up the 'ss-tick' events sent from server/launch
       $scope.tick = '?'
