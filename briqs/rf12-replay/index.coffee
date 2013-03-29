@@ -33,13 +33,6 @@ exports.factory = class
     stream = fs.createReadStream("#{__dirname}/20121130.txt.gz")
                   .pipe(zlib.createGunzip())
 
-    stream.on 'end', ->
-      console.info "#{logs.length} test packets loaded"
-      # start the process by locating the next time slot to use
-      times = _.pluck logs, 'time'
-      pos = _.sortedIndex times, Date.now() % 86400000
-      emitNext pos
-      
     parser = new logParser.factory
     
     parser.on 'packet', (packet) ->
@@ -47,7 +40,12 @@ exports.factory = class
       _.extend packet, nodeMap.rf12devices?[packet.device]  unless packet.band
       logs.push packet
 
-    parser.parseStream stream
+    parser.parseStream stream, ->
+      console.info "#{logs.length} test packets loaded"
+      # start the process by locating the next time slot to use
+      times = _.pluck logs, 'time'
+      pos = _.sortedIndex times, Date.now() % 86400000
+      emitNext pos
     
   destroy: ->
     clearTimeout @timer

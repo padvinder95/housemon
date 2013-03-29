@@ -3,12 +3,15 @@
 
     .row
       .eight.columns
-        h3 Graphs
+        h3 Graphs 
+          input(ng-model='hours'
+                ng-change='hoursChanged()'
+                placeholder='1.0 hour')
         #chart
 
       .four.columns
         h3
           input(type='text',ng-model='query',placeholder='Search...')
-        div(ng-repeat='row in status | filter:query | orderBy:"key"'
+        .hover(ng-repeat='row in status | filter:query | orderBy:"key"'
             ng-click='setGraph(row.key)') {{row.key}}
           span(ng-show='row.unit')  ({{row.unit}})

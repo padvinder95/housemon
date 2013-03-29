@@ -21,7 +21,7 @@ ss.server.once 'ready', ->
       # collect routes from the current list of installed briq objects
       for k,obj of models.bobs
         briq = models.briqs[obj.briq_id] # TODO: generic parent lookup
-        routes.push r  for r in briq.info.menus or []
+        routes.push r  for r in briq?.info?.menus or []
 
       # set up a list of modules which need to be loaded
       paths = ['/main']

@@ -6,12 +6,14 @@ exports.info =
       'incoming': 'event'
     results:
       'logger': 'dir'
+  downloads:
+    '/logger': './logger'
 
 state = require '../server/state'
 fs = require 'fs'
 
 LOGGER_PATH = './logger'
-fs.mkdir LOGGER_PATH
+fs.mkdir LOGGER_PATH, ->
 
 dateFilename = (now) ->
   # construct the date value as 8 digits

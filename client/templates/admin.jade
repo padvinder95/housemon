@@ -1,62 +1,80 @@
 .row
-
   .three.columns
-    input(ng-model='query',placeholder='Search...')
-    h3 Installed
+    h3(ng-show='bobs') Installed
+  .five.columns
+    h3 Briqs
+  .four.columns
+    h3
+      input(type='text',ng-model='query',ng-click='showAll()'
+            placeholder='Search...')
+
+.row
+  .three.columns
     ul.square
-      li(ng-repeat='bob in bobs | filter:query | orderBy:"key"'
+      li.hover(ng-repeat='bob in bobs | filter:query | orderBy:"key"'
          ng-click='selectBob(bob)')
         {{bob.key}}
-    h3 Briqs
-    ul.square
-      li(ng-repeat='briq in briqs | filter:query | orderBy:"info.name"'
-         ng-click='selectBriq(briq)')
-        {{briq.info.name}}
-             
-  .nine.columns(ng-show='briq')
-    .panel
-      h4 {{briq.info.name}}
-      h4.subheader {{briq.info.description}}
-      .row(ng-repeat='input in briq.info.inputs')
-        .three.columns
-          label.right.inline {{input.name}}:
-        .nine.columns(ng-switch='input.type')
-          textarea.eight(ng-switch-when='text'
-                         ng-model='input.value'
-                         ng-disabled='bob'
-                         rows=10)
-          input.four(ng-switch-default
-                     type='text'
-                     ng-model='input.value'
-                     ng-disabled='bob'
-                     placeholder='{{input.default}}')
-      .row
-        .nine.columns
-          input.button(type='submit'
-                       value='Install'
-                       ng-click='createBob()'
-                       ng-disabled='bob')
-        .three.columns
-          input.button.right(type='submit'
-                             value='Remove'
-                             ng-click='removeBob()'
-                             ng-show='bob')
 
-    .row(ng-show='feeds || results')
-      .two.columns
-      .three.columns
-        h5 Connections:
-      .three.columns(ng-show='feeds')
-        h5 Feeds
-        div(ng-repeat='(k,v) in feeds')
-          b {{k}}
-          i  - {{v}}
-      .three.columns.end(ng-show='results')
-        h5 Results
-        div(ng-repeat='(k,v) in results')
-          b {{k}}
-          i  - {{v}}
-      .one.columns
+  .nine.columns
+    div(ng-hide='briq')
+      ul.square
+        li.hover(ng-repeat='briq in briqs | filter:query | orderBy:"info.name"'
+           ng-click='selectBriq(briq)')
+          b {{briq.info.name}}
+          |  - {{briq.info.description}}
+    div(ng-show='briq')
+      .panel
+        h4 {{briq.info.name}}
+        h4.subheader {{briq.info.description}}
+        .row(ng-repeat='input in briq.info.inputs')
+          .three.columns
+            label.right.inline {{input.name}}:
+          .nine.columns(ng-switch='input.type')
+            textarea.eight(ng-switch-when='text'
+                           ng-model='input.value'
+                           ng-disabled='bob'
+                           rows=10)
+            input.four(ng-switch-default
+                       type='text'
+                       ng-model='input.value'
+                       ng-disabled='bob'
+                       placeholder='{{input.default}}')
+        .row
+          .nine.columns
+            input.button(type='submit'
+                         value='Install'
+                         ng-click='createBob()'
+                         ng-disabled='bob')
+          .three.columns
+            input.button.right(type='submit'
+                               value='Remove'
+                               ng-click='removeBob()'
+                               ng-show='bob')
+
+      .row(ng-show='bob',ng-repeat='(name,setting) in briq.info.settings')
+        .five.columns
+          label.right.inline {{setting.title}}:
+        .seven.columns
+          input.four(type='text'
+                     ng-model='bob[name]'
+                     ng-change='changed()'
+                     placeholder='{{setting.default}}')
+
+      .row(ng-show='feeds || results')
+        .two.columns
+        .three.columns
+          h5 Connections:
+        .three.columns(ng-show='feeds')
+          h5 Feeds
+          div(ng-repeat='(k,v) in feeds')
+            b {{k}}
+            i  - {{v}}
+        .three.columns.end(ng-show='results')
+          h5 Results
+          div(ng-repeat='(k,v) in results')
+            b {{k}}
+            i  - {{v}}
+        .one.columns
 
 .row
   .twelve.columns

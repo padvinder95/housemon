@@ -56,16 +56,17 @@ module.exports =
         ints.push v
         v = 0
     if ints[0] is 1
-      # only report values which have changed (for some params)
-      result =
-        usew: ints[6]
-        genw: ints[7]
+      # only report values which have actually changed
+      # for usew and genw, we only need to report the one that is active
+      result = {}
       @prev ?= []
       result.use1 = ints[1]  if ints[1] isnt @prev[1]
       result.use2 = ints[2]  if ints[2] isnt @prev[2]
       result.gen1 = ints[3]  if ints[3] isnt @prev[3]
       result.gen2 = ints[4]  if ints[4] isnt @prev[4]
       result.mode = ints[5]  if ints[5] isnt @prev[5]
+      result.usew = ints[6]  if ints[6] isnt @prev[6] or ints[6]
+      result.genw = ints[7]  if ints[7] isnt @prev[7] or ints[7]
       result.gas = ints[9]  if ints[9] isnt @prev[9]
       @prev = ints
       cb result

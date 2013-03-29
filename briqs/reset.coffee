@@ -19,7 +19,7 @@ state = require '../server/state'
 local = require '../local'
 redis = require 'redis'
 fs = require 'fs'
-child_process = require 'child_process'
+{exec} = require 'child_process'
 async = require 'async'
 logParser = require './jeemon-log-parser'
 
@@ -52,12 +52,12 @@ exports.flushRedis = ->
 
 exports.deleteArchive = ->
   console.log 'deleteArchive'
-  child_process.exec 'rm -r ./archive/*'
+  exec 'rm -r ./archive/*'
 
 exports.restart = ->
   console.log 'restart'
   # force restart by assuming nodemon is running and watching
-  child_process.exec 'touch ./package.json'
+  exec 'touch ./package.json'
 
 LOGDIR = '../Reference/house-logs'
 

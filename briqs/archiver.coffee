@@ -8,6 +8,8 @@ exports.info =
       'minutes': 'event'
     results:
       'archive': 'dir'
+  downloads:
+    '/archive': './archive'
   
 state = require '../server/state'
 fs = require 'fs'
@@ -29,7 +31,7 @@ if fs.existsSync ARCHMAP_PATH
 else
   archMap = _: 0 # sequence number
 
-fs.mkdir ARCHIVE_PATH # ignore mkdir errors (it probably already exists)
+fs.mkdir ARCHIVE_PATH, -> # ignore mkdir errors (it probably already exists)
 
 aggregated = {} # in-memory cache of aggregated values
 

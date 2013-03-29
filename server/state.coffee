@@ -1,5 +1,6 @@
 # Manage the state which is shared with all clients
 events = require 'eventemitter2'
+async = require 'async'
 redis = require 'redis'
 db = null
 
@@ -16,7 +17,7 @@ for k,v of process
       models.process[k] = v
       
 # fetch and store implement a simple persistent and sharable key-value store
-# "fetch" returnss everything, "store" saves & propagates keyed object changes
+# "fetch" returns everything, "store" saves & propagates keyed object changes
 # if the object has no "id", a new one will be assigned
 # if the object has no "key", the old copy will be deleted
 
@@ -42,6 +43,8 @@ setId = (name, obj, cb) ->
           throw err  if err
           # issue and assign a new id
           cb obj.id = id
+
+state.models = models
 
 state.fetch = (cb) ->
   cb models
@@ -71,7 +74,7 @@ state.reset = (name) ->
   for k,v of models[name]
     state.store name, { id: k }
 
-state.setupStorage = (collections, config) ->
+state.setupStorage = (collections, config, cb) ->
   db = redis.createClient config.port, config.host, config
   # can't call Redis's bgsave too often, it fails when still running
   db.occasionalSave = _.debounce db.bgsave, 5000
@@ -92,13 +95,13 @@ state.setupStorage = (collections, config) ->
 
   db.select config.db, (err) ->
     throw err  if err
-    loadData = (name) ->
+    async.eachSeries collections, (name, done) ->
       db.hgetall name, (err, ids) ->
         throw err  if err
         for k,v of ids
           state.store name, JSON.parse(v)
-    # loaded asynchronously, will need async module for completion callback
-    loadData name  for name in collections
+        done()
+    , cb # called once all model collections have been restored
 
 # force an explicit Redis save, see https://github.com/jcw/housemon/issues/6
 state.saveNow = (cb) ->

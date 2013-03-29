@@ -27,6 +27,8 @@ module.exports = (ng) ->
       $scope.collection 'bobs'
 
       briqAndBob = (briq, bob) ->
+        # if briq no longer exists, make sure we can still delete this object
+        briq = info: {}  if not briq and bob
         $scope.briq = briq
         $scope.bob = bob
         if briq?.info?.connections?
@@ -61,10 +63,18 @@ module.exports = (ng) ->
 
         # TODO candidate for a Briq method
         keys = obj.key.split(':').slice 1
-        for input in $scope.briq.info.inputs or []
+        for input in $scope.briq?.info.inputs or []
           input.value = keys.shift()
 
       $scope.removeBob = ->
         $scope.bobs.store _.omit $scope.bob, 'key'
         briqAndBob null
+
+      $scope.showAll = ->
+        briqAndBob null
+
+      # save changed settings in the bob on the server
+      $scope.changed = _.debounce ->
+        $scope.bobs.store $scope.bob
+      , 500
   ]

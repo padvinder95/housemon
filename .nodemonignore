@@ -5,8 +5,8 @@
 /.git/*
 /archive/*
 /client/*
-/histdata/*
 /logger/*
 /uploads/*
 /README.md
 /nohup.*
+/dump.rdb

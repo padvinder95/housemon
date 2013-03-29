@@ -2,11 +2,10 @@
   .twelve.columns
 
     .row
-      .ten.columns
+      .eight.columns
         h3 Status
-      .two.columns
+      .four.columns
         h3: input(type='text',ng-model='query',placeholder='Search...')
-    hr
 
     .row(ng-repeat='row in status | filter:query | orderBy:"key"'
          highlight-on-change='row.value')
@@ -17,5 +16,3 @@
       .one.columns {{row.unit}}
       .two.columns {{row.time | date:"MM-dd &nbsp; HH:mm:ss" }}
       .four.columns {{row.origin}} - {{row.type}} - {{row.name}}
-
-    hr

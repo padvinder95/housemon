@@ -46,12 +46,16 @@ module.exports =
 
   decode: (raw, cb) ->
     ints = (raw.readUInt16LE(1+2*i, true) for i in [0..6])
-    cb
-      yield: ints[0]
-      total: ints[1]
+    result =
       acw: ints[2]
       dcv1: ints[3]
       dcv2: ints[4]
-      dcw1: ints[5]
-      dcw2: ints[6]
-
+    # only report aggragated values when they actually change
+    @prev ?= []
+    result.yield = ints[0]  if ints[0] isnt @prev[0]
+    result.total = ints[1]  if ints[1] isnt @prev[1]
+    if ints[2]
+      result.dcw1 = ints[5]
+      result.dcw2 = ints[6]
+    @prev = ints
+    cb result

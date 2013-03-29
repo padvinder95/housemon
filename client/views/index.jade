@@ -3,15 +3,16 @@ html(lang='en',ng-controller='MainCtrl')
   head
     meta(charset='utf-8')
     meta(name='viewport',content='width=device-width')
-    title Welcome to {{local.exactName}}
+    title(ng-bind-template='Welcome to {{local.exactName}}') Welcome
     != SocketStream
     
   body
     nav.top-bar
-      ul.top-bar
+      ul
         li.name: h1: a(href='{{pkg.homepage}}')
-          img(src='/images/logo.png',height=27.5,width=27.5)
-          | &nbsp; {{local.exactName}}
+          img(src='/images/logo.png',height=27,width=27)
+          | &nbsp; 
+          span(ng-bind-template='{{local.exactName}}')
         li.toggle-topbar: a(href='#')
       section
         ul.right

@@ -9,7 +9,6 @@ exports.info =
   #   'lazy': '*'
 
 events = require 'events'
-lazy = require 'lazy'
 fs = require 'fs'
 zlib = require 'zlib'
 state = require '../server/state'
@@ -42,13 +41,15 @@ class JeeMonLogParser extends events.EventEmitter
     stream = fs.createReadStream filename
     if filename.slice -3 is '.gz'
       stream = stream.pipe zlib.createGunzip()
-    stream.on 'end', cb
-    @parseStream stream
+    @parseStream stream, cb
 
-  parseStream: (stream) ->
-    new lazy(stream)
-      .lines
-      .forEach (line) =>
-        @parse line.toString()
+  parseStream: (stream, cb) ->
+    all = []
+    stream.on 'data', (data) ->
+      all.push data.toString()
+    stream.on 'end', () =>
+      for line in all.join('').split '\n'
+        @parse line
+      cb()
 
 exports.factory = JeeMonLogParser

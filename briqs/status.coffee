@@ -12,8 +12,7 @@ exports.info =
   
 state = require '../server/state'
 
-models = undefined
-state.fetch (m) -> models = m
+models = state.models
 
 adjustValue = (value, info) ->
   if info.factor
@@ -62,10 +61,13 @@ processReading = (obj, oldObj) ->
     drv = findKey models.drivers, drvName
 
     if loc and drv
-      for param, value of obj
-        unless param in ['id','key']
-          info = drv[param]
-          updateStatus obj, loc, info, param, value  if info
+      for param, value of _.omit obj, 'id','key','time'
+        info = drv[param]
+        # weed out NaN and other things than don't fit in a 32-bit signed int
+        if info and value? and -2147483648 <= value < 2147483648
+          updateStatus obj, loc, info, param, value
+        else
+          console.info 'ignored value', locName, drvName, param, value
 
 exports.factory = class
 

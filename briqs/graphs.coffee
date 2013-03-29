@@ -1,6 +1,6 @@
 exports.info =
-  name: 'jcw-graphs'
-  description: 'The Graphs page will be used for trying out graphs'
+  name: 'graphs'
+  description: 'Show a graph with historical data'
   menus: [
     title: 'Graphs'
     controller: 'GraphsCtrl'

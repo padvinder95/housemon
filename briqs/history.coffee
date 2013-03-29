@@ -12,6 +12,9 @@ exports.info =
 state = require '../server/state'
 local = require '../local'
 redis = require 'redis'
+async = require 'async'
+
+MAXHOURS = 50 # keep readings newer than 50 hours ago
 
 keyMap = {}
 lastId = 0
@@ -36,8 +39,8 @@ storeValue = (obj, oldObj) ->
     # map each key to a unique id, and remeber that mapping
     unless keyMap[key]?
       keyMap[key] = ++lastId
-      db.zadd 'hist:keys', lastId, key
-    db.zadd "hist:#{keyMap[key]}", obj.time, obj.origval
+      db.zadd 'hist:keys', lastId, key, ->
+    db.zadd "hist:#{keyMap[key]}", obj.time, obj.origval, ->
 
 # callable from client as rpc
 exports.rawRange = (key, from, to, cb) ->
@@ -51,8 +54,14 @@ exports.rawRange = (key, from, to, cb) ->
     cb null, []
 
 cronTask = (minutes) ->
-  if minutes is 55
-    console.log 'history cleanup time!'
+  if minutes is 35 # clean up once an hour
+    console.info 'history cleanup started'
+    db.zrange 'hist:keys', 0, -1, 'withscores', (err, res) ->
+      throw err  if err
+      cutoff = Date.now() - MAXHOURS * 3600 * 1000
+      ids = (parseInt res[i+1] for i in [0...res.length] by 2)
+      async.eachSeries ids, (id, cb) ->
+        db.zremrangebyscore "hist:#{id}", '-inf', cutoff, cb
 
 exports.factory = class
   constructor: ->
