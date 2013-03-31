@@ -84,6 +84,13 @@ server = http.Server ss.http.middleware
 server.listen local.httpPort
 ss.start server
 
+# TODO need a better way to authenticate than this ugly HTTP access hack
+ss.http.router.on '/authenticate', (req, res) ->
+  accept = req._parsedUrl.query is local.password
+  req.session.userId = if accept then 1 else undefined
+  req.session.save (err) ->
+    res.serve 'main'
+
 # This event is periodically pushed to the clients to make them, eh, "tick"
 # special care is taken to synchronise to the exact start of a clock second
 setTimeout ->
