@@ -1,0 +1,8 @@
+.row
+  .twelve.columns
+    h1 Reprocess
+    div(ng-repeat='(dir,files) in logFiles')
+      h5(ng-click='reprocess(dir)') {{dir}}
+      span(ng-repeat='file in files')
+        span.hover(ng-click='reprocess(file)') {{file}}
+        |  &nbsp; 
