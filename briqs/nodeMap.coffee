@@ -52,6 +52,12 @@ exports.rf12devices =
     group: 5
     band: 868
 
+# the default is used by the "reprocess" briq when no other info is available
+exports.rf12default =
+    recvid: 1
+    group: 5
+    band: 868
+
 # static data, used for local testing and for replay of the JeeLabs data
 # these map incoming sensor identifiers to locations in the house (in Dutch)
 exports.locations =
