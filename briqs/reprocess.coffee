@@ -44,11 +44,14 @@ exports.reprocessLog = (name, cb) ->
     processOne name, cb
 
 processOne = (name, cb) ->
-  return cb()  unless name[0] is '2'
-  filename = "#{LOGGER_PATH}/#{name.slice 0, 4}/#{name}"
-  console.info 'reprocessing', filename
-  rf12info = null
+  parse = /^(\d\d\d\d)(\d\d)(\d\d)\./.exec name
+  return cb()  unless parse
 
+  basetime = Date.UTC parse[1], parse[2]-1, parse[3]
+  filename = "#{LOGGER_PATH}/#{parse[1]}/#{name}"
+  console.info 'reprocessing', filename
+
+  rf12info = null
 
   parser = new logParser.factory
 
@@ -70,4 +73,5 @@ processOne = (name, cb) ->
 
   parser.on 'packet', (packet) ->
     _.defaults packet, rf12info, nodeMap.rf12default
+    packet.time += basetime
     state.emit 'reprocess.packet', packet

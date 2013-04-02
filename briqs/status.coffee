@@ -74,7 +74,8 @@ processReading = (obj, oldObj) ->
 
 reprocessor = (reading) ->
   splitReading reading, (obj, loc, info, param, value) ->
-    state.emit 'reprocess.status', obj.time, param, value
+    key = "#{loc.title} - #{info.title}"
+    state.emit 'reprocess.status', obj.time, key, value
 
 exports.factory = class
 
