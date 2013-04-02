@@ -39,7 +39,7 @@ class JeeMonLogParser extends events.EventEmitter
   
   parseFile: (filename, cb) ->
     stream = fs.createReadStream filename
-    if filename.slice -3 is '.gz'
+    if filename.slice(-3) is '.gz'
       stream = stream.pipe zlib.createGunzip()
     @parseStream stream, cb
 
