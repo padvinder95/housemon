@@ -50,29 +50,38 @@ findKey = (collection, key) ->
     if key is v.key
       return v
 
+splitReading = (obj, handler) ->
+  [locName, other..., drvName] = obj.key.split '.'
+
+  loc = findKey models.locations, locName
+  unless loc
+    loc = findKey models.locations, drvName
+    drvName = drvName?.replace /-.*/, ''
+  drv = findKey models.drivers, drvName
+
+  if loc and drv
+    for param, value of _.omit obj, 'id','key','time'
+      info = drv[param]
+      # weed out NaN and other things than don't fit in a 32-bit signed int
+      if info and value? and -2147483648 <= value < 2147483648
+        handler obj, loc, info, param, value
+      else
+        console.info 'ignored value', locName, drvName, param, value
+
 processReading = (obj, oldObj) ->
   if obj
-    [locName, other..., drvName] = obj.key.split '.'
+    splitReading obj, updateStatus
 
-    loc = findKey models.locations, locName
-    unless loc
-      loc = findKey models.locations, drvName
-      drvName = drvName?.replace /-.*/, ''
-    drv = findKey models.drivers, drvName
-
-    if loc and drv
-      for param, value of _.omit obj, 'id','key','time'
-        info = drv[param]
-        # weed out NaN and other things than don't fit in a 32-bit signed int
-        if info and value? and -2147483648 <= value < 2147483648
-          updateStatus obj, loc, info, param, value
-        else
-          console.info 'ignored value', locName, drvName, param, value
+reprocessor = (reading) ->
+  splitReading reading, (obj, loc, info, param, value) ->
+    state.emit 'reprocess.status', obj.time, param, value
 
 exports.factory = class
 
   constructor: ->
     state.on 'set.readings', processReading
+    state.on 'reprocess.reading', reprocessor
 
   destroy: ->
     state.off 'set.readings', processReading
+    state.ofJSON.stringify readingf 'reprocess.reading', reprocessor

@@ -23,7 +23,7 @@ announceListener = (ainfo) ->
   ainfo.name = announcers[ainfo.swid]
   console.info 'swid', ainfo.swid, ainfo.name, ainfo.buffer
 
-packetListener = (packet, ainfo) ->
+processOnePacket = (packet, ainfo, cb) ->
   # use announcer info if present, else look for own static mapping
   name = ainfo?.name or rf12nodes[packet.group]?[packet.id]
   if name
@@ -40,12 +40,25 @@ packetListener = (packet, ainfo) ->
           if time < 86400000
             time += now - now % 86400000
           info.time = time
-          state.store 'readings', info
+          cb null, info
       catch err # TODO report the failure to the client
-        console.error name, packet, err
+        cb err
   else
-    console.info 'raw', packet
-        
+    cb()
+
+packetListener = (packet, ainfo) ->
+  processOnePacket packet, ainfo, (err, reading) ->
+    if err
+      console.error pakket, err
+    else if reading
+      state.store 'readings', reading
+    else
+      console.info 'raw', packet
+
+reprocessor = (packet) ->
+  processOnePacket packet, null, (err, reading) ->
+    state.emit 'reprocess.reading', reading  if reading
+
 loadAllDecoders = ->
   fs.readdir './drivers', (err, files) ->
     throw err  if err
@@ -72,7 +85,9 @@ exports.factory = class
     loadAllDecoders()
     state.on 'rf12.announce', announceListener
     state.on 'rf12.packet', packetListener
+    state.on 'reprocess.packet', reprocessor
         
   destroy: ->
     state.off 'rf12.announce', announceListener
     state.off 'rf12.packet', packetListener
+    state.off 'reprocess.packet', reprocessor
