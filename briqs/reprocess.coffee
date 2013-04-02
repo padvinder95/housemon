@@ -66,7 +66,7 @@ processOne = (name, cb) ->
           recvid: parseInt(match[1])
           group: parseInt(match[2])
           band: parseInt(match[3])
-        console.info 'reprocess info', rf12info
+        console.info 'reprocess rf12info', rf12info
 
   parser.on 'packet', (packet) ->
     _.defaults packet, rf12info, nodeMap.rf12default

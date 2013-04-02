@@ -4,7 +4,7 @@ exports.info =
   connections:
     feeds:
       'status': 'collection'
-      'reprocess': 'event'
+      'reprocess.status': 'event'
       'minutes': 'event'
     results:
       'archive': 'dir'
@@ -114,9 +114,9 @@ cronTask = (minutes) ->
 exports.factory = class
   constructor: ->
     state.on 'set.status', storeValue
-    state.on 'reprocess', archiveValue
+    state.on 'reprocess.status', archiveValue
     state.on 'minutes', cronTask
   destroy: ->
     state.off 'set.status', storeValue
-    state.off 'reprocess', archiveValue
+    state.off 'reprocess.status', archiveValue
     state.off 'minutes', cronTask
