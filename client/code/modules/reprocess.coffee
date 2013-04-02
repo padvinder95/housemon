@@ -9,4 +9,8 @@ module.exports = (ng) ->
       
       $scope.reprocess = (name) ->
         rpc.exec 'host.api', 'reprocessLog', name
+
+      $scope.years = {}
+      $scope.toggleYear = (y) ->
+        $scope.years[y] = not $scope.years[y]
   ]

@@ -2,7 +2,14 @@
   .twelve.columns
     h1 Reprocess
     div(ng-repeat='(dir,files) in logFiles')
-      h5(ng-click='reprocess(dir)') {{dir}}
-      span(ng-repeat='file in files')
-        span.hover(ng-click='reprocess(file)') {{file}}
-        |  &nbsp; 
+      p
+        button(ng-click='toggleYear(dir)') {{dir}}
+        |  has {{files.length}} logfiles
+      div(ng-show='years[dir]')
+        p Click on a filename or 
+          button(ng-click='reprocess(dir)')
+            | reprocess all
+        span(ng-repeat='file in files')
+          span.hover(ng-click='reprocess(file)') {{file}}
+          |  &nbsp; 
+        hr
