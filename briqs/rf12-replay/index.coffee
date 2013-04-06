@@ -11,6 +11,7 @@ fs = require 'fs'
 zlib = require 'zlib'
 nodeMap = require '../nodeMap'
 state = require '../../server/state'
+_ = require 'underscore'
 
 exports.factory = class
   

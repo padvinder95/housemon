@@ -2,14 +2,13 @@
 
 console.error 'pid', process.pid, Date() # mark new launch in the error log
 
-global._ = require 'underscore'
-
 # This list is also the order in which everything gets initialised
 state = require './state'
 briqs = require('./briqs') state
 local = require '../local'
 http = require 'http'
 ss = require 'socketstream'
+_ = require 'underscore'
 
 # Auto-load all briqs from a central directory
 briqs.loadAll ->

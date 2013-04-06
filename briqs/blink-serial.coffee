@@ -15,6 +15,7 @@ exports.info =
 
 serialport = require 'serialport'
 state = require '../server/state'
+_ = require 'underscore'
 
 exports.factory = class extends serialport.SerialPort
   

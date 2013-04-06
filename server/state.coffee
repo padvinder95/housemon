@@ -1,6 +1,7 @@
 # Manage the state which is shared with all clients
 events = require 'eventemitter2'
 async = require 'async'
+_ = require 'underscore'
 redis = require 'redis'
 db = null
 

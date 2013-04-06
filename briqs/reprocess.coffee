@@ -12,6 +12,7 @@ async = require 'async'
 logParser = require './jeemon-log-parser'
 nodeMap = require './nodeMap'
 state = require '../server/state'
+_ = require 'underscore'
 
 LOGGER_PATH = './logger'
 

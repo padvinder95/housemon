@@ -17,6 +17,7 @@
 # in this file. If you override settings, the "replay" briq may no longer work.
 
 fs = require 'fs'
+_ = require 'underscore'
 
 # this is still used for parsing logs which do not include announcer packets
 # TODO: needs to be time-dependent, since the config can change over time
