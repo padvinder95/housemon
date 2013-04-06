@@ -12,6 +12,14 @@ ss.server.on 'reconnect', ->
   # force full reload to re-establish all model links
   window.location.reload true
 
+# sample console log in the browser:
+#   app ready
+#   models fetched ["pkg", "local", "process", "briqs", "bobs", "..."]
+#   require ["/main", "/home", "/admin", "/data", "/status", "/..."]
+#   ng bootstrap
+#   app config
+#   app run
+
 ss.server.once 'ready', ->
   #jQuery ->
     console.info 'app ready'
