@@ -11,6 +11,7 @@ exports.info =
       'status': 'collection'
   
 state = require '../server/state'
+_ = require 'underscore'
 
 models = state.models
 

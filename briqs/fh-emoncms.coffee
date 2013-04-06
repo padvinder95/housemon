@@ -17,6 +17,7 @@ exports.info =
 
 state = require '../server/state'
 http = require 'http'
+_ = require 'underscore'
 
 exports.factory = class
   
