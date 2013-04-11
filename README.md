@@ -4,6 +4,8 @@ Real-time home monitoring and automation.
 
 More info at <http://jeelabs.org/tag/housemon/>.
 
+[![Dependency Status](https://gemnasium.com/jcw/housemon.png)](https://gemnasium.com/jcw/housemon)
+
 # Installation
 
 > Note: go to [this page][B] for detailed Raspberry Pi setup instructions.
@@ -52,4 +54,4 @@ To use this project as starting point for a fresh SocketStream project:
 
 # License
 
-[MIT](http://opensource.org/licenses/MIT)
+MIT
