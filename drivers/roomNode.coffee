@@ -33,5 +33,6 @@ module.exports =
       light: raw[1]
       humi: raw[2] >> 1
       moved: raw[2] & 1
-      temp: if t < 0x200 then t else 0x200 - t
+      temp: if t < 0x200 then t else t - 0x400
+      # temp from -512 (e.g. 51.2) --> +511 (e.g. 51.1) supported by roomNode sketch. NB 512 will be incorrectly reported!
 
