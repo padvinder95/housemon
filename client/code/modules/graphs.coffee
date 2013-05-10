@@ -9,6 +9,10 @@ module.exports = (ng) ->
       selection = {}
       lastKey = null # TODO temp, to make redraw on hours change work
 
+      graph = new Dygraph 'chart', undefined,
+        stepPlot: true
+        fillGraph: true
+
       $scope.setGraph = (key) ->
         selection = {}
         selection[key] = true
@@ -35,13 +39,17 @@ module.exports = (ng) ->
 
           data = for i in [0...values.length] by 2
             [
-              parseInt values[i+1]
+              new Date(parseInt values[i+1])
               adjustValue parseInt(values[i]), info
             ]
 
-          # TODO big nono: DOM access inside controller!
-          chart = $('#chart')[0]
-          graph = Flotr.draw chart, [ label: key, data: data ], options
+          console.log info
+          graph.updateOptions
+            file: data
+            legend: "always"
+            labels: [ "", info.key ]
+            labelsSeparateLines: true
+            ylabel: info.unit
 
       # TODO open page with fixed choice, for testing convenience only
       $scope.setGraph 'meterkast - Usage house'
