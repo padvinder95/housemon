@@ -34,15 +34,18 @@ module.exports = (ng) ->
             ]
 
           lastKey = key # now we can accept status change events
+          isRate = info.unit in [ 'W', 'km/h' ]
 
           graph.updateOptions
             file: dataPoints
-            stepPlot: info.unit in [ 'W', 'km/h' ]
+            stepPlot: isRate
+            fillGraph: isRate
+            includeZero: isRate
             legend: "always"
             labels: [ "", info.key ]
             labelsSeparateLines: true
             ylabel: info.unit
-            fillGraph: true
+            showRangeSelector: true
 
       # TODO open page with fixed choice, for testing convenience only
       $scope.setGraph 'meterkast - Usage house'
