@@ -37,7 +37,7 @@ module.exports = (ng) ->
 
           graph.updateOptions
             file: dataPoints
-            stepPlot: info.unit is 'W'
+            stepPlot: info.unit in [ 'W', 'km/h' ]
             legend: "always"
             labels: [ "", info.key ]
             labelsSeparateLines: true
