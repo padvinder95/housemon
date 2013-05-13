@@ -32,6 +32,8 @@ setupListener = ->
           time: time * 1000
           key: "flukso.#{sensor}"
           value: value
+  client.on 'error', (msg) ->
+    console.log 'mqtt error', msg
   client
 
 exports.factory = class
