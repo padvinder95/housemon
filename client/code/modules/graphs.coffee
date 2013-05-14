@@ -8,9 +8,9 @@
 labels = ['']
 points = []
 info = undefined
+isRate = undefined
 
 addSeries = (name, values) ->
-  emptyPoint = (null  for i in labels.length)
   # figure out in which position the new series will end up, or append if new
   column = _.indexOf labels, name
   if column < 0
@@ -21,10 +21,16 @@ addSeries = (name, values) ->
 
   # utility code, add/replace one value, then advance to next point
   setNextPoint = (val) ->
-    point = points[next++]
+    point = points[next]
     while column >= point.length
       point.push null
-    point[column] = val
+    # hack: for step-wise graphs, place the value in the *previous* slot
+    # this is because the area rectangles must map to the preceding period!
+    if isRate and next > 0
+      points[next-1][column] = val
+    else
+      point[column] = val
+    next += 1
 
   # merge new series into existing points
   for i in [0...values.length] by 2
@@ -32,10 +38,9 @@ addSeries = (name, values) ->
     # add null for intermediate points
     while points[next] and points[next][0] < time
       setNextPoint null
-    # if this is a new time, then first insert a new point will all nulls
+    # if this is a new time, then first insert an empty point for it
     if not points[next] or points[next][0] > time
-      points.splice next, 0, _.clone emptyPoint
-      points[next][0] = time
+      points.splice next, 0, [time]
     # now we can safely add/replace the new value
     setNextPoint adjustValue parseInt(values[i]), info
 
@@ -44,23 +49,23 @@ addSeries = (name, values) ->
     setNextPoint null
 
 removeSeries = (name) ->
+  # determine which column to remove, ignore if it's not present
   column = _.indexOf labels, name
   if column > 0
+    # remove the label and all its values
     labels.splice column, 1
-    if labels.length <= 1
-      points = []
-    else
-      for point in points
-        point.splice column, 1
-      points = _.reject points, (point) ->
-        _.every point.slice(1), (v) -> v is null
+    for point in points
+      point.splice column, 1
+    # remove all points consisting only of nulls
+    points = _.reject points, (point) ->
+      _.every point.slice(1), (v) -> v is null
 
 toggleSeries = (name, values) ->
   if name in labels
     removeSeries name
   else
     addSeries name, values
-  console.log 'ss', labels, (p.length  for p in points)
+  # console.log 'ss', labels, (p.length  for p in points)
 
 addOne = (name, time, value) ->
   
@@ -99,7 +104,7 @@ module.exports = (ng) ->
             connectSeparatedPoints: true
 
       # TODO open page with fixed choice, for testing convenience only
-      #$scope.setGraph 'meterkast - Usage house'
+      $scope.setGraph 'meterkast - Usage house'
 
       $scope.$on 'aset.status', (event, obj, oldObj) ->
         if obj.key is lastKey
