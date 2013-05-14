@@ -99,9 +99,12 @@ module.exports = (ng) ->
             dataPoints.shift()
           graph.updateOptions file: dataPoints
 
-      # $scope.hoursChanged = _.debounce ->
-      #   $scope.setGraph lastKey
-      # , 500
+      $scope.hoursChanged = _.debounce ->
+        for key in _.clone labels # careful, labels var is changed during loop
+          if key isnt ''
+            removeSeries key
+            $scope.setGraph key
+      , 500
   ]
 
 # TODO this duplicates the same code on the server, see status.coffee
