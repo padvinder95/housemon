@@ -11,42 +11,27 @@ info = undefined
 isRate = undefined
 
 addSeries = (name, values) ->
-  # figure out in which position the new series will end up, or append if new
-  column = _.indexOf labels, name
-  if column < 0
-    column = labels.length
+  if _.indexOf(labels, name) < 0
     labels.push name
 
-  next = 0 # next point to adjust
+    # merge new series into existing points
+    next = 0 # next point to adjust
+    for i in [0...values.length] by 2
+      time = new Date(parseInt values[i+1])
+      # add null for intermediate points
+      while points[next] and points[next][0] < time
+        points[next++].push null
+      # if this is a new time, then first insert an empty point for it
+      if not points[next] or points[next][0] > time
+        points.splice next, 0, [time]
+        while points[next].length + 1 < labels.length
+          points[next].push null
+      # now we can safely append the new value
+      points[next++].push adjustValue parseInt(values[i]), info
 
-  # utility code, add/replace one value, then advance to next point
-  setNextPoint = (val) ->
-    point = points[next]
-    while column >= point.length
-      point.push null
-    # hack: for step-wise graphs, place the value in the *previous* slot
-    # this is because the area rectangles must map to the preceding period!
-    if isRate and next > 0
-      points[next-1][column] = val
-    else
-      point[column] = val
-    next += 1
-
-  # merge new series into existing points
-  for i in [0...values.length] by 2
-    time = new Date(parseInt values[i+1])
-    # add null for intermediate points
-    while points[next] and points[next][0] < time
-      setNextPoint null
-    # if this is a new time, then first insert an empty point for it
-    if not points[next] or points[next][0] > time
-      points.splice next, 0, [time]
-    # now we can safely add/replace the new value
-    setNextPoint adjustValue parseInt(values[i]), info
-
-  # finish any remaining entries
-  while next < points.length
-    setNextPoint null
+    # finish any remaining entries
+    while next < points.length
+      points[next++].push null
 
 removeSeries = (name) ->
   # determine which column to remove, ignore if it's not present
