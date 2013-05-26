@@ -49,7 +49,7 @@ processOnePacket = (packet, ainfo, cb) ->
 packetListener = (packet, ainfo) ->
   processOnePacket packet, ainfo, (err, reading) ->
     if err
-      console.error pakket, err
+      console.error packet, err
     else if reading
       state.store 'readings', reading
     else
