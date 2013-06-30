@@ -1,0 +1,30 @@
+.row
+  .three.columns
+    h1 Docs 
+  .five.columns
+    h1.subheader(ng-show='docfile') {{docfile.name}}
+  .four.columns
+    
+    
+.row
+  .three.columns
+    select.span2(ng-model='sortOrder')
+      option(value='-date') Most Recent
+      option(value='name') Name
+    input(type='text',ng-model='query'
+          placeholder='Filter List...')
+    hr
+
+    ul.square
+      li.hover(ng-repeat='doc in docs | filter:query | orderBy:sortOrder')
+        //-may change this to ahref=#... so the deeplink switches, but faster like this.
+        a.clickable( ng-click='selectDoc(doc)') {{doc.name}}
+  .nine.columns
+    div( ng-show='docfile', ng-bind-html-unsafe="docfile.data" )     
+    h6( ng-hide='docfile') Select a document to the left. Check github regularly for updated documents.
+             
+
+      
+      
+      
+      

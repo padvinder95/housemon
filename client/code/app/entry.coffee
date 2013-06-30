@@ -57,6 +57,7 @@ ss.server.once 'ready', ->
 routes = [
   { title: 'Home', controller: 'HomeCtrl', route: '/' }
   { title: 'Admin', controller: 'AdminCtrl' }
+  { title: 'Docs', controller: 'DocsCtrl' , route: '/docs'}
 ]
 
 app = angular.module 'app', []
