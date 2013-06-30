@@ -69,7 +69,8 @@ archiveValue = (time, param, value) ->
   item.m2 += delta * (value - item.mean)
 
 storeValue = (obj, oldObj) ->
-  archiveValue obj.time, obj.key, obj.origval
+  if obj? #therwise error on resetStatus
+    archiveValue obj.time, obj.key, obj.origval
 
 saveToFile = (seg, slots, id, cb) ->
   path = "#{ARCHIVE_PATH}/p#{seg}/p#{seg}-#{id}.dat"

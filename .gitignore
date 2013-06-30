@@ -4,3 +4,4 @@ histdata/
 logger/
 node_modules/
 uploads/
+briqs/nodeMap-local.coffee
