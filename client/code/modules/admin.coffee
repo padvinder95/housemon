@@ -19,10 +19,10 @@
 #   more... config settings for this installed instance?
 
 module.exports = (ng) ->
-
+  # lightbulb - added in $log for debug helper
   ng.controller 'AdminCtrl', [
-    '$scope',
-    ($scope) ->
+    '$scope','$log', 'rpc'
+    ($scope,$log, rpc) ->
 
       $scope.collection 'bobs'
 
@@ -36,6 +36,10 @@ module.exports = (ng) ->
           $scope.results = briq.info.connections.results
         else
           $scope.feeds = $scope.results = null
+
+        # and make a nice description if we are supplied markdown
+        $scope.prepareBriqDescription()
+
       
       $scope.selectBriq = (obj) ->
         # if there are no args, it may already have been installed
@@ -52,6 +56,7 @@ module.exports = (ng) ->
         keyList = [$scope.briq.info.name]
         for input in $scope.briq.info.inputs or []
           keyList.push input.value?.keys or input.value or input.default
+          #$log.info "keyList is now:" + keyList
         key = keyList.join(':')
 
         $scope.bobs.store
@@ -73,8 +78,35 @@ module.exports = (ng) ->
       $scope.showAll = ->
         briqAndBob null
 
-      # save changed settings in the bob on the server
-      $scope.changed = _.debounce ->
+      # lightbulb - removed in favour of a batch submission of all settings in one go before inited() called.
+      #$scope.changed = _.debounce ->
+      #  $scope.bobs.store $scope.bob
+      #, 500
+
+      
+      # lightbulb - save changed settings in the bob on the server in one go.
+      $scope.updateBriqSettings = ->
         $scope.bobs.store $scope.bob
-      , 500
+
+       
+      # lightbulb - convert our descriptionHtml (markdown) to html fragment with identification wrapper .markdownContainer
+      $scope.prepareBriqDescription = () ->
+        if $scope.briq
+          $scope.briq.info["descriptionFull"] = rpc.exec 'admin.MarkdowntoHtml', $scope.briq.info.descriptionHtml
+      
+      
+      # lightbulb - shall we enable the debug info panel-set
+      $scope.showDebug = true #toggle to false to hide panel 
+      
+      # lightbulb - allow selective show of bobInfo for debuging
+      $scope.showBobInfo = false
+      $scope.toggleBobInfo = ( toggle ) ->
+        if toggle?
+          $scope.showBobInfo = toggle
+        else
+          $scope.showBobInfo = !$scope.showBobInfo 
+        
+
+        
+      
   ]
