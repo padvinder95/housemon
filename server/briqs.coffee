@@ -26,6 +26,7 @@ module.exports = (state) ->
           unless bob
             args = obj.key.split(':').slice 1
             bob = new briq.factory(args...)
+            bob.bobInfo?(obj) #who we are (for self referencing if we have the bobInfo method)
             installed[obj.key].bob = bob
           for k,v of briq.info.settings
             bob[k] = obj[k] ? v.default ? ''
