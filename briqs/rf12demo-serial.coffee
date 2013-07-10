@@ -16,6 +16,7 @@ exports.info =
   settings:
     initcmds:
       title: 'Initial commands sent on startup'
+      default: '?'
 
 serialport = require 'serialport'
 state = require '../server/state'
