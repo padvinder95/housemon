@@ -106,3 +106,15 @@ setTimeout ->
       lastMinute = minutes
   , 1000
 , 1000 - Date.now() % 1000
+
+# see https://github.com/remy/nodemon#controlling-shutdown-of-your-script
+for signal in ['SIGINT', 'SIGQUIT', 'SIGTERM', 'SIGUSR2']
+  do (signal) ->
+    process.once signal, ->
+      console.log '\nCleaning up after', signal
+      cleanupBeforeExit ->
+        process.kill process.pid, signal
+
+cleanupBeforeExit = (cb) ->
+  # nothing yet
+  cb()
