@@ -42,7 +42,8 @@ exports.actions = (req, res, ss) ->
       markdown = marked("Oops, That file could not be processed. Log an [issue](https://github.com/jcw/housemon/issues) ")
       
       try
-        markdown = marked(fdata)
+        #tweak until i can submit pull to marked (buffer()/BOM issue)
+        markdown = marked(fdata.toString() )
       catch err
         console.log err
       finally

@@ -1,6 +1,6 @@
 ###
 #   rf12registrymanager 
-#   Version: 0.1.0
+#   Version: 0.1.1
 #   Author: lightbulb -at- laughlinez (dot) com
 #           https://github.com/TheDistractor
 #   more info at: http://thedistractor.github.io/housemon/rf12registry.html
@@ -14,7 +14,11 @@
 #   NOTE: We are kept in the briq folder, but are not really a briq, rather briq support, so we are not seen by briq loader
 #         as we dont supply .info exports etc.
 #
+#   Updated: 0.1.1 - supports basic debug 
+#                  - %B %b reversed - see notes
+#                  - small tidyup
 ###
+
 
 state = require '../server/state'
 
@@ -33,14 +37,14 @@ class RF12Registry #we don't extend with EventEmitter(2), we use the 'state' obj
 
   ###
 
-  _debug     : true  #do we output console logs
   _bandInfo  : {315:{shortcode:3,drivercode:0}, 433:{shortcode:4,drivercode:1}, 868:{shortcode:8,drivercode:2}, 915:{shortcode:9,drivercode:3} } 
-  _version   : "0.1.0"
+  _version   : "0.1.1"
   
   #we want this as a singleton (ID) here! 
   constructor: (@id) ->
 
     #instance variables
+    @_debug     = false  #do we output console logs
     @_enabled   = false #is our 'registry' open for business
     @_bobInfo   = null  #bob instantiation data
     @_handlers  = {}    #contains all the handlers for registered 'write' patterns
@@ -63,6 +67,13 @@ class RF12Registry #we don't extend with EventEmitter(2), we use the 'state' obj
   version : () =>
     return @_version   
 
+  setDebug : (flag) =>
+    return @_debug = flag
+  getDebug : () =>
+    return @_debug 
+  setConfig : (obj) =>
+    
+    
   #allows us to obtain some of the briq/bob identity information should we need it in future.  
   bobInfo: (bob) =>
     if bob?
@@ -170,13 +181,21 @@ class RF12Registry #we don't extend with EventEmitter(2), we use the 'state' obj
         #note: the entire escape issue is cludged currently and only works in the most 'basic' way
         #TODO: replace with a more fully featured parser with 'escapes'
         buffer = obj.mask
-        buffer = @parseToken buffer, "{%B}", band                                #use full band data i.e 868 sent as 868
-        buffer = @parseToken buffer, "{%b}", @_bandInfo[band]?.shortcode || band #use band shortcut i.e 868=8 if match
+        buffer = @parseToken buffer, "{%b}", band                                #use full band data i.e 868 sent as 868
+        buffer = @parseToken buffer, "{%B}", @_bandInfo[band]?.shortcode || band #use band shortcut i.e 868=8 if match
         buffer = @parseToken buffer, "{%g}", group
         buffer = @parseToken buffer, "{%i}", node
         buffer = @parseToken buffer, "{%h}", header
-        buffer = @parseToken buffer, "{\\r}", "\r"                               #translate \r
-        buffer = @parseToken buffer, "{\\n}", "\n"                               #translate \n
+        
+        #TODO: Add support for \x?? and \c?
+        buffer = @parseToken buffer, "{\\\\x07}", "\x07"                             #translate \a
+        buffer = @parseToken buffer, "{\\\\x1B}", "\x1B"                             #translate \e
+        buffer = @parseToken buffer, "{\\\\f}"  , "\f"                               #translate \f
+        buffer = @parseToken buffer, "{\\\\n}"  , "\n"                               #translate \n
+        buffer = @parseToken buffer, "{\\\\r}"  , "\r"                               #translate \r
+        buffer = @parseToken buffer, "{\\\\t}"  , "\t"                               #translate \t
+        buffer = @parseToken buffer, "{\\\\v}"  , "\v"                               #translate \v
+        
         buffer = @parseToken buffer, "{%s}", data
         
         #TODO: add back the time delay tokens {%d} where d is a digit i.e {%500} = 500ms

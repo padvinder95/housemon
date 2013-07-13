@@ -21,8 +21,8 @@
 module.exports = (ng) ->
   # lightbulb - added in $log for debug helper
   ng.controller 'AdminCtrl', [
-    '$scope','$log', 'rpc'
-    ($scope,$log, rpc) ->
+    '$scope','$log', '$q','rpc'
+    ($scope,$log, $q, rpc) ->
 
       $scope.collection 'bobs'
 
@@ -39,7 +39,12 @@ module.exports = (ng) ->
 
         # and make a nice description if we are supplied markdown
         $scope.prepareBriqDescription()
-
+        #get the most recent debug value from bob if its available
+        $scope.supportsDebug = rpc.exec 'admin.supportsDebug', $scope.bob.key
+        $scope.debugBobrpc = rpc.exec 'admin.getDebug', $scope.bob.key 
+        #$log.info "Looking for:#{$scope.bob.key}"
+        $scope.supportsDumpBob = rpc.exec 'admin.supportsDump', $scope.bob.key    
+        $scope.BobJSON = ""
       
       $scope.selectBriq = (obj) ->
         # if there are no args, it may already have been installed
@@ -105,8 +110,29 @@ module.exports = (ng) ->
           $scope.showBobInfo = toggle
         else
           $scope.showBobInfo = !$scope.showBobInfo 
-        
 
+          
+      # lightbulb - button to toggle injection of debug into Briq Instance (Bob)
+      # Note: update to handle the false/true, 0/1,2+ case (i.e where debug can be integer for if debug > level cases)
+      $scope.debugBob = null #used to hold the active Bob's debug flag
+
+      $scope.toggleDebugBob = ( ) ->
         
-      
+        if true 
+          $log.info "debugBob before toggle send:#{ JSON.stringify $scope.debugBob}"
+          $log.info "supportsDebug:#{ JSON.stringify $scope.supportsDebug}"
+          $scope.debugBobrpc = rpc.exec 'admin.setDebug', $scope.bob.key , !$scope.debugBob
+
+          
+      $scope.$watch 'debugBobrpc' , (newValue,oldValue, scope) ->
+        $scope.debugBob = newValue        
+          
+
+      $scope.dumpBob = () ->
+        $scope.BobJSON = rpc.exec 'admin.BobtoJSON', $scope.bob.key  
+          
+          
+          
+          
+          
   ]
