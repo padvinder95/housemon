@@ -17,7 +17,10 @@
 #   Additionally this Briq supplies a GUI interface via http://localhost<:port>/rf12input url within HouseMon
 #
 #
+#   Updated: 0.1.1 - supports basic debug 
+#                  - small tidyup
 ###
+
 
 #we set our requires above exports so we can use them inline
 net = require('net')
@@ -26,7 +29,7 @@ state = require '../server/state'
 ss = require 'socketstream'
 
 exports.info =
-  version: '0.1.0'  
+  version: '0.1.1'  
   name: 'rf12input'
   description: 'Provides input support using multiple transports for the RF12 Registry Service'
   descriptionHtml: 'This module installs listeners on various transport mechanisms (like UDP/TCP/UNIX Sockets etc.) to help you establish write requests to RF12Registry clients.<br />Use the link above to obtain the detailed manual.'
@@ -46,11 +49,12 @@ RF12RegistryManager = require('./rf12registrymanager.coffee').RF12RegistryManage
 
 class RF12Input 
 
-  _debug : true #class variable
   
   constructor: -> 
 
+  
     #setup instance variables
+    @_debug = false 
     @_registry = new RF12RegistryManager.Registry() #this will broadcast in 50ms
     
     @fs = require('fs');
@@ -62,6 +66,11 @@ class RF12Input
     @Tserver = {} #tcp socket object
 
     
+
+      
+  inited: ->
+
+
     #try to remove our domain socket incase it was left hanging.
     try
       @fs.unlinkSync @DOMAIN_SOCK
@@ -70,6 +79,7 @@ class RF12Input
     finally
       #just continue
 
+  
     self = @
 
     
@@ -123,6 +133,17 @@ class RF12Input
       console.log 'server bound :' + self.TCP_PORT if self._debug
     #===============================================
 
+  setDebug : (flag) =>
+    return @_debug = flag
+  getDebug : () =>
+    return @_debug 
+  setConfig : (obj) =>
+    if obj?.DomainSocket?    
+      @DOMAIN_SOCK = obj.DomainSocket
+    if obj?.Port?    
+      @TCP_PORT = obj.Port
+      
+    
   help: (stream) =>
     stream.write "syntax send <band> <group> <node> <header> <command>\n"
      

@@ -1,6 +1,6 @@
 ###
 #   BRIQ: rf12demo-readwrite
-#   Version: 0.1.0
+#   Version: 0.1.1
 #   Author: lightbulb -at- laughlinez (dot) com
 #           https://github.com/TheDistractor
 #   more info at: http://thedistractor.github.io/housemon/rf12demo-readwrite.html
@@ -10,6 +10,9 @@
 #   About:
 #   Encapsulates read/write of RF12Demo.10+ sketch
 #
+#   Updated: 0.1.1 - supports basic debug 
+#                  - %B %b reversed - see notes
+#                  - small tidyup
 ###
 
 
@@ -25,7 +28,7 @@ exports.info =
   author: 'lightbulb'
   authorUrl: 'http://thedistractor.github.io/'
   briqUrl: '/docs/#briq-rf12demo-readwrite.md'
-  version: '0.1.0'
+  version: '0.1.1'
   inputs: [
     {
       name: 'Serial port'
@@ -37,7 +40,7 @@ exports.info =
     }
     {    
       name: 'Shell Version'
-      default: '' #supply a fixed version (don't go using version cmd which can cause loop on some CLI's)
+      default: null #supply a fixed version (don't go using version cmd which can cause loop on some CLI's)
     }
     
   ]
@@ -61,7 +64,7 @@ exports.info =
       default: null
     commands:
       title: 'Add/Override default CLI commands'
-      default: '{"version":"v\r","config":"?\r"}' 
+      default: null #'{"version":"v","config":"?"}' 
       
 serialport = require 'serialport'
 
@@ -72,20 +75,20 @@ class RF12demo_rw extends serialport.SerialPort
     #define our instance variables
     @_registry      = null                                             #the registry this instance will be connected to 
     @_writerConfigs = null                                             #supported writer patterns
-    @_nodeConfig    = {band:null,group:null,nodeid:null,version:null}  #this nodes config data
+    @_nodeConfig    = {band:null,group:null,nodeid:null,collectmode:null,version:null}  #this nodes config data
     @_registered    = false                                            #have we registered our writers?
     @_writeable     = false                                            #can we support writes? (RF12Demo.10+)
     @_cliCommands   = {"version":"v\r", "config":"?\r"}                #supported by RF12Demo.10+
-    @_debug         = true
+    @_debug         = false
     @_opened        = false
     @_options       = {baud:57600, version:null}                       #basic configuration options
   
     @_initCmdTimeOut= 500                                              #delay from inited() call to issue of initial commands like config / version
     @_writeQ        = []                                               #array of writes with associated delays
-  
-    #@_uniqueid      = null  #unused
-  
 
+    @_gate          = false  #protect loop
+    
+    @_testFlag      = false  #for test use
     #continue with constructor
     
     self = this
@@ -113,7 +116,8 @@ class RF12demo_rw extends serialport.SerialPort
       
     if params?[1]? #supply specific version 
       try
-          @_options.version = params[1]    
+          if !!params[1].trim()
+            @_options.version = params[1]          
       catch err
         console.log "Constructor Version Param Error: #{err}"
       finally
@@ -145,7 +149,13 @@ class RF12demo_rw extends serialport.SerialPort
   deviceName : () =>
     return @device
 
-
+  setDebug : (flag) =>
+    console.log "Briq setDebug = #{flag}"
+    return @_debug = flag
+  getDebug : () =>
+    return @_debug 
+  setConfig : (obj) =>
+    
   setup: ()=>
 
 
@@ -153,19 +163,40 @@ class RF12demo_rw extends serialport.SerialPort
       
       console.log "Setup params start for:#{@device} #{JSON.stringify @_options} - config:#{ JSON.stringify @_nodeConfig }" if @_debug
     
-      if @initcmds
+      if !!@initcmds.trim()
         console.log "Sending Init sequence to #{@device}" if @_debug
         @write @initcmds
 
-      if @_options.version?
-        @setVersion @_options.version
-        
+      unless @_options.version is null 
+        @setVersion @device, @_options.version
+        unless @_nodeConfig.version > 11
+          try
+            delete @_cliCommands.version
+          catch err
+          finally
+
+
+      try
+        if !!@commands.trim()
+          #gui supplied some additional cli commands or overrides existing
+          cmds = JSON.parse @commands
+          @_cliCommands = _.extend @_cliCommands, cmds
+          console.log "cliCommands now #{JSON.stringify(@_cliCommands)}" if @_debug
+      catch err
+        console.log "Parameter error:#{err} for :#{escape(@commands)} on #{@device}" if @_debug
+      finally
+
+
+
+
+          
       #get the CLI to emit our config string, then chain to version unless supplied
       if @_cliCommands.config?
         setTimeout =>
+          @_testFlag = true
           console.log "rf12 config request for:#{@device}" if @_debug
           @write @_cliCommands.config
-        , 500 #should be enough time for CLI to be ready after init?? TODO:move to a config setting
+        , 800 #should be enough time for CLI to be ready after init?? TODO:move to a config setting
       
     , @_initCmdTimeOut #how long to wait before we start the init process.
 
@@ -307,12 +338,16 @@ class RF12demo_rw extends serialport.SerialPort
   writers : ( writerConfigs, callback ) =>
     #writeconfigs are treated as single tokenized strings '{%b}/{%g}|{%1}' or if begin with '[', JSON objects i.e. '["{%b}/{%g}|{%1}", "{%b}/200|{%1}"]'
     #NOTE: JSON objects must be correctly formed
-    
+  
+    #reset
+    @_writerConfigs = [] #this will contain all the 'write' patterns we wish to support
+
+  
     unless @_writeable
       console.log "Driver #{@deviceName()} is not currently write enabled" if @_debug
       return callback(null,false)
 
-    unless writerConfigs
+    if !writerConfigs.trim()
       console.log "No writeConfigs supplied" if @_debug
       return callback(null,false)
     
@@ -333,11 +368,10 @@ class RF12demo_rw extends serialport.SerialPort
     else
       list.push writerConfigs
       
-    @_writerConfigs = [] #this will contain all the 'write' patterns we wish to support
     
     for p,i in list 
       [bgpat, dpat...] = p.split '|' #split writestring from radio match
-      bgpat = bgpat.replace /{%b}/g , @_nodeConfig.band #TODO: This should really be %B
+      bgpat = bgpat.replace /{%b}/g , @_nodeConfig.band #note: %B = 8, %b = 868
       bgpat = bgpat.replace /{%g}/g , @_nodeConfig.group
       bgpat = bgpat.replace /\//,'[.]' #turn / into dot
       #we now have a pattern that the 'registry' can regex to match for writes
@@ -350,7 +384,7 @@ class RF12demo_rw extends serialport.SerialPort
         if @_nodeConfig.version == 9
           dpat[0] = "{%s}" #using older bytes,nodeid 's' syntax (no band switch)
         else
-          dpat[0] = "{%b},{%g},{%i},{%h},{%s}>" #using new .10+ syntax that can switch bands etc
+          dpat[0] = "{%B},{%g},{%i},{%h},{%s}>" #using new .10+ syntax that can switch bands etc
       
       
       #keep a record
@@ -373,16 +407,12 @@ class RF12demo_rw extends serialport.SerialPort
     console.log "isWriteable evaluates to #{canWrite} for:#{@device}" if @_debug
     return canWrite
   
-  #[part of the RF12Registry Interface]
-  parseVersion : (thedevice,data,match) =>
-    if @device != thedevice #its not our event
-      return null
-      
-    console.log "#{@device} got a rf12.version message : #{match.slice(1)}" if @_debug   
-    return @setVersion match.slice(1)
         
   #[part of the RF12Registry Interface]
-  setVersion : (version) =>
+  setVersion : (thedevice, version) =>
+    #reset gate
+    @_gate = false
+  
     console.log "I am #{@device} in setVersion" if @_debug
     try
       if parseFloat(version) 
@@ -399,17 +429,19 @@ class RF12demo_rw extends serialport.SerialPort
   
         
   #[part of the RF12Registry Interface]
-  parseConfig : (thedevice, data, match) =>
+  configure : (thedevice, data) =>
         console.log "event: rf12.config: from: #{thedevice} being reviewed by: #{@device}" if @_debug 
         if @device != thedevice #its not our event
           console.log "rf12.config rejected by: #{@device}" if @_debug
           return null
 
+        if @_gate
+          console.log "Gate has stopped event on : #{@device}"
+          return #protect from loops       
 
-        @_nodeConfig["group"] = match[1]
-        @_nodeConfig["band"] = match[2]
-        @_nodeConfig["nodeid"] = match[0]
-
+        
+        @_gate = true  
+          
         console.log "#{@device} config data nodeid: #{@_nodeConfig.nodeid} group:#{@_nodeConfig.group} band:#{@_nodeConfig.band}" if @_debug
 
         #get the CLI to emit the version string unless we have been specifically told
@@ -418,21 +450,15 @@ class RF12demo_rw extends serialport.SerialPort
           #but only if we have writers specified, as in the case 
           #of RF12Demo upto v10, does not support version cmd
           #and we dont need version if no writers specified
-          if @writemasks?
-            if @_cliCommands.version? #TODO:check we dont need this validation any more?
-              setTimeout =>
-                #this will cause endless loop for CLI's that dont respond to version, but instead re-issue config (like RF12Demo.9). 
-                # solution: specify version in settings.
-                #TODO: so we really need to put in a race gate counter of some type.
-                @write @_cliCommands.version
+          
+          if @_cliCommands.version? #TODO:check we dont need this validation any more?
+            setTimeout =>
+              @write @_cliCommands.version
 
-              , 50
-            else
-              #no version cmd to use and no version specifically supplied           
-              @setVersion('9')
+            , 50
           else
-            unless @_cliCommands.version?
-              @setVersion('9') #no version yet and no version command set, also no writers, assume v9
+            #no version cmd to use and no version specifically supplied           
+            @setVersion(@device,'9')
             
 
         @setWriteable @isWriteable()         
@@ -451,21 +477,15 @@ class RF12demo_rw extends serialport.SerialPort
   inited: ->
   
     self = this
+    #reset gate
+    @_gate = false
 
     console.log "#{@device} is inited() with id:#{@_uniqueid} options:#{JSON.stringify @_options} config: #{JSON.stringify @_nodeConfig}" if @_debug
-    
-    
-    try
-      if @commands?
-        #gui supplied some additional cli commands or overrides existing
-        cmds = JSON.parse @commands
-        @_cliCommands = _.extend @_cliCommands, cmds
-        console.log "cliCommands now #{JSON.stringify(@_cliCommands)}" if @_debug
-    catch err
-      console.log "Parameter error:#{err} for :#{escape(@commands)} on #{@device}" if @_debug
-    finally
-    
-    
+  
+    if @_registry?
+      #console.log "Closing Existing Registry..."
+      @setRegistry null
+  
     
     #inited is called everytime a gui parameter is changed (see debounce--replaced)    
     if @_opened #device is ready to recv
@@ -488,8 +508,6 @@ class RF12demo_rw extends serialport.SerialPort
 
 
       #does our instance have identity, if so we can listen for writes
-      state.on 'rf12.config', self.parseConfig           #config is available
-      state.on 'rf12.version', self.parseVersion         #version is available
       state.on 'rf12.sendcomplete', self.sendComplete    #message send confirmation
       state.on 'rf12.processWriteQ', self.processWriteQ  #check and pump messages
       
@@ -514,27 +532,33 @@ class RF12demo_rw extends serialport.SerialPort
               # generate normal packet event, for decoders
               state.emit 'rf12.packet', info, ainfo[info.id]
           else #something other than 'OK...'
-            match = /^ -> (\d+) b/.exec data
+            match = /^ -> (\d+) b/.exec data   #bytes sent?
             if match #we have results of a send from the mcu in the format ' -> x b' where x is bytes.
                state.emit 'rf12.sendcomplete', @device, match[1]
             else
               # look for config lines of the form: A i1* g5 @ 868 MHz
-              match = /^ [A-Z[\\\]\^_@] i(\d+)\*? g(\d+) @ (\d\d\d) MHz/.exec data
+              match = /^ [A-Z[\\\]\^_@] i(\d+)(\*)? g(\d+) @ (\d\d\d) MHz/.exec data
               if match
-                console.log "rf12demo-readwrite:#{@device} config match:" , data if self._debug
+                console.log "rf12demo-readwrite:#{@device} config match:" , data #if self._debug
                 info.recvid = parseInt(match[1])
-                info.group = parseInt(match[2])
-                info.band = parseInt(match[3])
-                #console.log "emitting event rf12.config by: #{@device} | #{self.device}"                
-                #state.emit 'rf12.config', (@device), data, match.slice(1)                
-                self.parseConfig @device, data, match.slice(1)
+                #added match[2] for collectmode
+                info.group = parseInt(match[3])
+                info.band = parseInt(match[4])
+                
+                @_nodeConfig["nodeid"] = match[1]
+                @_nodeConfig["collectmode"] = match[2]?
+                @_nodeConfig["group"] = match[3]
+                @_nodeConfig["band"] = match[4]
+
+                self.configure @device, data #see if we can successfully configure
+                state.emit "rf12.config" , @device, @_nodeConfig #tell world about config
+
               else
                 #look for a reply from a version command 'v'
-                match = /^\[RF12demo.(\d+)\]/i.exec data
+                match = /^\[RF12demo\.([0-9]*\.[0-9]+|[0-9]+)]/i.exec data   
                 if match
-                  console.log "rf12demo-readwrite:#{@device} version match:", data if self._debug
-                  #state.emit 'rf12.version', (@device), data, match.slice(0)
-                  self.parseVersion @device, data, match.slice(0)
+                  self.setVersion @device, match.slice(1)
+                  state.emit "rf12.version" , @device, @_nodeConfig["version"] #tell world about version 
                 else  
                   # unrecognized input, usually a "?" line
                   state.emit 'rf12.other', data
@@ -544,20 +568,17 @@ class RF12demo_rw extends serialport.SerialPort
   close : () =>
     console.log "close() called" if @_debug
 
+    if @_registry?
+      @_registry.deregister @
+
+    @_registered = false
+    @_writeable = false
+      
     #[part of the RF12Registry Interface]
     state.off 'RF12Registry.RegistryUp' , @registryUp
     state.off 'RF12Registry.RegistryDown', @registryDown
     state.off 'rf12.sendcomplete', @sendComplete
-    state.off 'rf12.config', @parseConfig           
-    state.off 'rf12.version', @parseVersion         
     state.off 'rf12.processWriteQ', @processWriteQ  
-
-
-    if @_registry
-      @_registry.deregister this
-      
-    @_registered = false
-    @_writeable = false
     
     console.log "#{@deviceName()} has closed (and should be deleted)." if @_debug
                   

@@ -1,6 +1,6 @@
 ###
 #   BRIQ: rf12registry 
-#   Version: 0.1.0
+#   Version: 0.1.1
 #   Author: lightbulb -at- laughlinez (dot) com
 #           https://github.com/TheDistractor
 #   more info at: http://thedistractor.github.io/housemon/rf12registry.html
@@ -12,7 +12,10 @@
 #   see RF12RegistryManager and RF12Registry classes  
 #
 #
+#   Updated: 0.1.1 - supports basic debug 
+#                  - small tidyup
 ###
+
 
 
 #state obtained so we can refer to it in exports if needed
@@ -22,7 +25,7 @@ state = require '../server/state'
 RF12RegistryManager = require('./rf12registrymanager.coffee').RF12RegistryManager
 
 exports.info =
-  version: '0.1.0'
+  version: '0.1.1'
   name: 'rf12registry'
   description: 'An RF12Registry to enable compatible RF12 Writers to register their write interface.'
   descriptionHtml: 'This module allows other RF12 compatible "write" aware modules to register their ability to handle write requests for matching frequency and band patterns.<br/>More information can be obtained from the [about] link above.' 
@@ -48,15 +51,23 @@ exports.info =
   #    title: 'dynamically load a new write transform'  
 
 class RF12RegistryShell 
-  _registry = null #static
-  _debug : true
   
   constructor: -> 
+    @_debug = false
+
     console.log "about to create 'the' registry..." if @_debug
     @_registry = new RF12RegistryManager.Registry() #this will broadcast in 50ms if its not already alive
-    console.log "registry instantiated:", @_registry if @_debug
+    console.log "registry instantiated..." if @_debug
     return @_registry  
 
+  setDebug : (flag) =>
+    return @_debug = flag
+  getDebug : () =>
+    return @_debug 
+
+  setConfig : (obj) =>
+
+    
   getDevices: () =>
     if @_registry?
       return devices = @_registry.getDevices()
