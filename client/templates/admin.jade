@@ -111,10 +111,10 @@
         .one.columns
         
       //-this section added by 'lightbulb' to support future debug features
-      .row(ng-show='showDebug')
+      .row(ng-show='showDebug && bob')
         .twelve.columns
           h5.subheader Debugging Information:        
-          .row(ng-show='bob')
+          .row()
             .two.columns
             .two.columns
               //- Just BobInfo for now - more to follow
@@ -126,6 +126,32 @@
               h6.subheader Raw Data:
               i  {{ bob }}
             .three.columns.end
+          .row(ng-show='supportsDebug')
+            .two.columns
+            .two.columns
+              //- toggle debug
+              input.button( type='submit', ng-disabled='! supportsDebug' , ng-click='toggleDebugBob(debugBob)', value='Debug {{debugBob && "OFF" || "ON"}}') 
+            .four.columns
+              span.subheader.right Debug is currently: {{debugBob }}
+            .four.columns( ng-show='debugBob' )
+              //
+          .row
+            br          
+          .row(ng-show='supportsDumpBob')
+            .two.columns
+            .two.columns
+              //- toggle debug
+              input.button( type='submit', ng-disabled='! supportsDumpBob' , ng-click='dumpBob()', value='Dump Bob') 
+            .eight.columns
+              
+          .row(ng-show='supportsDumpBob')
+            .two.columns
+            .ten.columns
+              .BobDump(ng-show='BobJSON')
+                code(style='') {{BobJSON }} 
+            
+            
+            
           //- Duck Typing Proxy Debug row to place here.
         
         

@@ -10,3 +10,41 @@ exports.info =
     title: 'Sandbox'
     controller: 'SandboxCtrl'
   ]
+
+  
+  
+class Sandbox 
+
+  
+  constructor: -> 
+    #do nothing
+    @_debug = false
+    @someprop = false
+    @badprop = true
+  
+  #simple debug api methods
+  setDebug : (flag) =>
+    return @_debug = flag
+  
+  getDebug : () =>
+    return @_debug 
+  
+  setConfig : (obj) =>
+    if obj?.SomeProp?    
+      @someprop = obj.SomeProp
+  
+  dump : () =>
+    #example to serialize without @badprop (as opposed to generic dump on bob)
+    #to show value of implementing dump() on object.
+    return JSON.stringify @, (key, value) ->
+      if key == 'badprop'
+        return undefined
+      
+      return value
+        
+  inited : () =>
+    #this module has (optionally) be sent setDebug() and setConfig() by this time.
+  
+    
+exports.factory = Sandbox
+    
