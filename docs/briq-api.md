@@ -73,7 +73,7 @@ If the following methods are available within your Briq Class, they can be used 
    if a debug flag is present within the global briq configuration file /briqs.json - see below
    This method can also be called interactively by the Admin module.
 
--  setDebug: (flag)
+-  getDebug: (flag)
 
    boolean:flag
 
@@ -83,8 +83,12 @@ If the following methods are available within your Briq Class, they can be used 
 
   If present, can be called interactively by the Admin module to dump internals of your running bob for basic debug purposes. Should return a string.
 
+- setConfig: ()
+  If present, this function will be called for each set of matching configurations within the briqs.json - see below. 
 
 ##Global Briq Configuration file.
+
+An example template 'briqs.json.template' is provided to get you started - rename/copy this to 'briqs.json'
 
 Upon startup, HouseMon will look for a *briqs.json* configuration file within the application root folder. Presently the use of this file is
 limited to providing a debug flag specific to a bob instance, and configuration objects specific to matching regex on bob key. The format is as follows:
@@ -102,15 +106,17 @@ limited to providing a debug flag specific to a bob instance, and configuration 
        }
       }
 
+#### debug keys
 The debug key holds a child object of id/value pairs. The boolean value representing the value to be passed into the *.setDebug()* method of the bob once instantiated.
 In the example above, the fictional bob with id=0 will be passed the value of *false* to the *setDebug()* method if present. 
 
+#### configuration keys
 The config key holds a child object of key(regex)/object pairs. The key(regex) field will be matched to the key of a bob, and if a match is found, the object will be passed to a
 *setConfig()* function of the bob if present.
 
 Keys are matched in order presented within the *briqs.json* file. It is possible to target a base config using briq name, and subsequent per-instance configurations
 using multiple config entries as show above (where bobs with param1 present, will be passed and object with overrides for prop2),
-in this case your bob's *setConfig* will be called multiple times.
+in this case your bob's *setConfig()* will be called multiple times.
 
 
  
