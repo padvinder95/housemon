@@ -27,7 +27,7 @@ module.exports =
     batt:
       title: 'Battery voltage'
       unit: 'V'
-      scale: 1
+      scale: 2
       min: 80
       max: 160
 
