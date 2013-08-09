@@ -14,4 +14,4 @@ module.exports =
   
   decode: (raw, cb) ->
     cb
-      light: raw[2] #0 is sender id, 1 is message's nodeid that is in there as an extra check
+      setpoint: raw[2] #0 is sender id, 1 is message's nodeid that is in there as an extra check
