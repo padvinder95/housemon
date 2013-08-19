@@ -12,35 +12,13 @@ _ = require 'underscore'
 fs = require 'fs'
 semver = require 'semver'
 
-_node_ver = ">=0.10.0"
+nodeIsTooOld = ->
+  {engines:{node}} = require '../package'
+  unless semver.satisfies process.version, node
+    console.error "Node.js #{process.version} is too old, needs to be #{node}"
+    return true
 
-_package_json = null
-try #catch a non-existant file
-  _package_json = require '../package.json' 
-catch err
-  if err.code == 'MODULE_NOT_FOUND'
-    #skip exit, just not setup yet
-    console.log "Package Configuration file missing, will continue."
-  else
-    #we should dump here as it may be important
-    console.log "Package Configuration file Error: ", err
-    process.exit 1
-finally
-
-
-if _package_json?
-  if _package_json.engines?
-    if _package_json.engines.node?
-      _node_ver = _package_json.engines.node 
-      
-
-unless semver.satisfies( process.version, _node_ver)
-  console.log "Your version of node #{process.version} is not compatible with HouseMon #{_node_ver}. Please check and update."
-  process.exit 1
-
-
-
-
+process.exit 1  if nodeIsTooOld()
 
 # Auto-load all briqs from a central directory
 briqs.loadAll ->
