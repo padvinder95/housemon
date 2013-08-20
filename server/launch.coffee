@@ -42,6 +42,7 @@ ss.http.route '/', (req, res) ->
   res.serveClient 'main'
 
 # Persistent sessions and storage based on Redis
+# TODO replace redis by LevelDB, https://github.com/rvagg/node-level-session
 ss.session.store.use 'redis', local.redisConfig
 # ss.publish.transport.use 'redis', local.redisConfig
 collections = ['bobs','readings','locations','drivers','uploads','status']
