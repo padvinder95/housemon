@@ -16,7 +16,7 @@ fs = require 'fs'
 async = require 'async'
 _ = require 'underscore'
 
-SLOTSIZE_MIN = 60 # each archive slot holds 60 minutes of aggragated values
+SLOTSIZE_MIN = 60 # each archive slot holds 60 minutes of aggregated values
 SLOTSIZE_MS = SLOTSIZE_MIN * 60 * 1000 # archive slot size in milliseconds
 
 FILESIZE = 1024 # number of slots per archive file

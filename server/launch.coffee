@@ -1,6 +1,6 @@
 # Web server startup, i.e. first code loaded from app.js
 
-console.error 'pid', process.pid, Date() # mark new launch in the error log
+console.warn 'pid', process.pid, Date() # mark new launch in the error log
 
 # This list is also the order in which everything gets initialised
 state = require './state'
@@ -42,6 +42,7 @@ ss.http.route '/', (req, res) ->
   res.serveClient 'main'
 
 # Persistent sessions and storage based on Redis
+# TODO replace redis by LevelDB, https://github.com/rvagg/node-level-session
 ss.session.store.use 'redis', local.redisConfig
 # ss.publish.transport.use 'redis', local.redisConfig
 collections = ['bobs','readings','locations','drivers','uploads','status']

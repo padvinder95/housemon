@@ -8,7 +8,7 @@ More info at <http://jeelabs.org/tag/housemon/>.
 
 # Installation
 
-> Note: go to [this page][B] for detailed Raspberry Pi setup instructions.
+*(Note: go to [this page][B] for detailed Raspberry Pi setup instructions)*
 
 Install [Node.js][N] (it has to be version 0.10.x) and [redis][R], then:
 
