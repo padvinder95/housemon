@@ -7,7 +7,7 @@ class Aggregator
 
   update: (value) ->
     # see http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-    @min = @max = value  if @count = 0
+    @min = @max = value  if @count is 0
     @min = value  if value < @min
     @max = value  if value > @max
     # this is based on Welford's algorithm to reduce round-off errors
@@ -19,9 +19,9 @@ class Aggregator
     sdev = if @count > 1 then Math.sqrt @m2 / (@count - 1) else 0
     _.extend _.omit(@, 'm2'), {sdev}
 
-create: () -> new Aggregator
+create = () -> new Aggregator
 
-pack: (item) ->
+pack = (item) ->
   data = new Buffer(18)
   # data.fill 0
   data.writeUInt16LE item.count, 0
@@ -31,7 +31,7 @@ pack: (item) ->
   data.writeInt32LE Math.round(item.sdev), 14
   data
 
-unpack: (data) ->
+unpack = (data) ->
   count: data.readUInt16LE 0
   mean: data.readUInt32LE 2
   min: data.readUInt32LE 6
