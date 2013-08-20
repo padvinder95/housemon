@@ -1,6 +1,6 @@
 # Web server startup, i.e. first code loaded from app.js
 
-console.error 'pid', process.pid, Date() # mark new launch in the error log
+console.warn 'pid', process.pid, Date() # mark new launch in the error log
 
 # This list is also the order in which everything gets initialised
 state = require './state'

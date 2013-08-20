@@ -7,6 +7,7 @@
 /rrdarchive/*
 /client/*
 /logger/*
+/storage/*
 /uploads/*
 /README.md
 /nohup.*
