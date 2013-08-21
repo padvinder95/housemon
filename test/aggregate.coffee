@@ -43,28 +43,25 @@ describe 'aggregator', ->
 
   describe '#update', ->
 
-    it 'called once', ->
+    it 'is called once', ->
       a = aggregator.create()
       a.update 9
-
       e = a.extract()
       verifyObject e, {count: 1, mean: 9, min: 9, max: 9, sdev: 0}
 
-    it 'called twice', ->
+    it 'is called twice', ->
       a = aggregator.create()
       a.update 9
       a.update 1
-
       e = a.extract()
       verifyObject e, {count: 2, mean: 5, min: 1, max: 9}
       e.sdev.should.be.closeTo 5.65, 0.01
 
-    it 'called 3 times with same value', ->
+    it 'is called 3 times with same value', ->
       a = aggregator.create()
       a.update 9
       a.update 9
       a.update 9
-
       e = a.extract()
       verifyObject e, {count: 3, mean: 9, min: 9, max: 9, sdev: 0}
 
@@ -83,7 +80,6 @@ describe 'aggregator', ->
       a = aggregator.create()
       a.update 9
       a.update 1
-
       u = aggregator.unpack aggregator.pack a.extract()
       # note that sdev 5.65 has been rounded up by packing
       verifyObject u, {count: 2, mean: 5, min: 1, max: 9, sdev: 6}
