@@ -1,9 +1,14 @@
 _ = require 'underscore'
 
+# An aggregator consumes values and then tracks some statistics about them,
+# i.e. their mean (average), minimum and maximum value, and standard deviation.
+# These stats can be extracted and packed into a compact binary representation.
+# Code expects integer values (for improved size and speed on low-end machines).
+
 class Aggregator
   constructor: ->
-    @count = @min = @max = 0
     @mean = @m2 = 0.0
+    @count = @min = @max = 0
 
   update: (value) ->
     # see http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance

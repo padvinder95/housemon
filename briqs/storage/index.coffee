@@ -9,9 +9,9 @@ db = level './storage', {}, (err) ->
   throw err  if err
   if true
     console.log 'db opened', db.db.getProperty 'leveldb.stats'
-    db.db.approximateSize 'reading~', 'reading~~', (err, size) ->
+    db.db.approximateSize ' ', '~', (err, size) ->
       throw err  if err
-      console.log 'reading size ~ %db', size
+      console.log 'storage size ~ %d bytes', size
 
 processValue = (obj, oldObj) ->
   dbkey = "reading~#{obj.key}~#{obj.time}"
