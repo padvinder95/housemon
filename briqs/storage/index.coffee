@@ -15,7 +15,7 @@ db = level './storage', {}, (err) ->
 
 processValue = (obj, oldObj) ->
   dbkey = "reading~#{obj.key}~#{obj.time}"
-  db.put dbkey, obj.value, (err) ->
+  db.put dbkey, obj.origval, (err) ->
     throw err  if err
 
 exports.factory = class

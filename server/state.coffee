@@ -6,7 +6,7 @@ redis = require 'redis'
 db = null
 
 # set up the central data models used by each client
-models = 
+models =
   pkg: require '../package'
   local: require '../local'
   process: {}
@@ -16,7 +16,7 @@ for k,v of process
   unless k in ['stdin', 'stdout', 'stderr', 'mainModule']
     unless typeof v is 'function'
       models.process[k] = v
-      
+
 # fetch and store implement a simple persistent and sharable key-value store
 # "fetch" returns everything, "store" saves & propagates keyed object changes
 # if the object has no "id", a new one will be assigned
@@ -26,7 +26,7 @@ module.exports = state = new events.EventEmitter2(wildcard: true)
 
 #state.onAny (args...) ->
 #  console.info '>', @event, args...
-  
+
 # make sure this object has an id, issue a new one via redis if needed
 # TODO: could avoid async with a scan for highest ID on node.js startup
 setId = (name, obj, cb) ->
@@ -70,7 +70,7 @@ state.store = (name, obj, cb) ->
       models[name] = collection
       state.emit 'publish', name, obj, oldObj
     cb?()
-    
+
 state.reset = (name) ->
   for k,v of models[name]
     state.store name, { id: k }
@@ -79,7 +79,7 @@ state.setupStorage = (collections, config, cb) ->
   db = redis.createClient config.port, config.host, config
   # can't call Redis's bgsave too often, it fails when still running
   db.occasionalSave = _.debounce db.bgsave, 5000
-  
+
   state.on 'publish', (name, obj) ->
     if obj.key?
       db.hset name, obj.id, JSON.stringify(obj)
