@@ -57,4 +57,4 @@ module.exports =
         title: 'Add/Override default CLI commands'
         default: null #'{"version":"v","config":"?"}' 
         
-  factory: './rf12demo-readwrite'
+  factory: 'rf12demo-readwrite'

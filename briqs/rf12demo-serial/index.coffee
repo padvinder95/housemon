@@ -20,4 +20,4 @@ module.exports =
         title: 'Initial commands sent on startup'
         default: '?'
 
-  factory: './rf12demo-serial'
+  factory: 'rf12demo-serial'

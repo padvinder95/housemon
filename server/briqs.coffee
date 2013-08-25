@@ -46,8 +46,9 @@ module.exports = (state) ->
             args = obj.key.split(':').slice 1
             factory = briq.factory
             # special case: strings cause delayed loading, i.e. lazy require's
-            factory = require factory  if factory.constructor is String
-            bob = new briq.factory(args...)
+            if factory.constructor is String
+              factory = require "../briqs/#{obj.key}/#{factory}"
+            bob = new factory(args...)
             bob.bobInfo?(obj) #who we are (for self referencing if we have the bobInfo method)
             #lightbulb - if we have a briq config json, we see if we need to set debug flags
             if briqConfig.debug?[obj.id]?

@@ -6,4 +6,4 @@ module.exports =
     packages:
       'mqtt': '*'
 
-  factory: './mqtt-client'
+  factory: 'mqtt-client'
