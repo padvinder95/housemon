@@ -3,6 +3,8 @@
 ss = require 'socketstream'
 fs = require 'fs'
 local = require '../local'
+async = require 'async'
+npm = require 'npm'
 
 # briqs configuration settings can now be found in local.json, under key "briqs"
 briqConfig = local.briqs or {}
@@ -38,9 +40,13 @@ module.exports = (state) ->
         installed[obj.key] ?= {}
         installed[obj.key].info = briq.info
         if briq.factory
+          # TODO: consider using events and emit/on for all the optional calls
           bob = installed[obj.key].bob
           unless bob
             args = obj.key.split(':').slice 1
+            factory = briq.factory
+            # special case: strings cause delayed loading, i.e. lazy require's
+            factory = require factory  if factory.constructor is String
             bob = new briq.factory(args...)
             bob.bobInfo?(obj) #who we are (for self referencing if we have the bobInfo method)
             #lightbulb - if we have a briq config json, we see if we need to set debug flags
@@ -51,8 +57,6 @@ module.exports = (state) ->
               for k,v of briqConfig.config
                 if obj.key.match k
                   bob.setConfig?(v)
-              
-              
               
             installed[obj.key].bob = bob
           for k,v of briq.info.settings
@@ -67,21 +71,23 @@ module.exports = (state) ->
         orig.bob?.destroy?()
         delete installed[oldObj.key]
 
-  loadFile = (filename) ->
-    loaded = require "../briqs/#{filename}"
-    if loaded.info?.name
-      loaded.key = filename
-      state.store 'briqs', loaded
+  loadFile = (filename, cb) ->
+    unless filename[0] is '.'
+      loaded = require "../briqs/#{filename}"
+      if loaded.info?.name
+        loaded.key = filename
+        state.store 'briqs', loaded
+    process.nextTick cb
 
   loadAll: (cb) ->
     # TODO: delete existing briqs
     # scan and add all briqs, async
     fs.readdir './briqs', (err, files) ->
       throw err  if err
-      for f in files
-        loadFile f  unless f[0] is '.'
-      cb?()
-    # TODO: need newer node.js to use fs.watch on Mac OS X
-    #  see: https://github.com/joyent/node/issues/3343
-    # fs.watch './briqs', (event, filename) ->
-    #   ... briq event, filename
+      async.eachSeries files, (f, next) ->
+        loadFile f, next
+      , cb
+      # TODO: need newer node.js to use fs.watch on Mac OS X
+      #  see: https://github.com/joyent/node/issues/3343
+      # fs.watch './briqs', (event, filename) ->
+      #   ... briq event, filename
