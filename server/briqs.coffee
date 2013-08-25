@@ -16,6 +16,7 @@ installed = {}
 module.exports = (state) ->
 
   #lightbulb - currently used by admin rpc module
+  # TODO: this should probably be replaced by a generic by-key find in models
   state.getBobByKey = (key) ->    
     for k,briq of installed
       #console.log "looking at briq: #{k}"

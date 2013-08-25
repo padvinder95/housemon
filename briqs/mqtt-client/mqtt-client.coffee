@@ -1,12 +1,5 @@
-exports.info =
-  name: 'mqtt-client'
-  description: 'Subscribe to an MQTT message broker and collect readings'
-  connections:
-    packages:
-      'mqtt': '*'
-
 mqtt = require 'mqtt' # https://github.com/adamvr/MQTT.js
-state = require '../server/state'
+state = require '../../server/state'
 
 PORT = 1883
 HOST = '192.168.1.122'
@@ -36,7 +29,7 @@ setupListener = ->
     console.log 'mqtt error', msg
   client
 
-exports.factory = class
+module.exports = class
   
   constructor: ->
     @client = setupListener()
