@@ -3,7 +3,6 @@
 ss = require 'socketstream'
 fs = require 'fs'
 local = require '../local'
-async = require 'async'
 npm = require 'npm'
 
 # briqs configuration settings can now be found in local.json, under key "briqs"
@@ -72,22 +71,21 @@ module.exports = (state) ->
         orig.bob?.destroy?()
         delete installed[oldObj.key]
 
-  loadFile = (filename, cb) ->
+  loadFile = (filename) ->
     unless filename[0] is '.'
       loaded = require "../briqs/#{filename}"
       if loaded.info?.name
         loaded.key = filename
         state.store 'briqs', loaded
-    process.nextTick cb
 
   loadAll: (cb) ->
     # TODO: delete existing briqs
     # scan and add all briqs, async
     fs.readdir './briqs', (err, files) ->
       throw err  if err
-      async.eachSeries files, (f, next) ->
-        loadFile f, next
-      , cb
+      loadFile f  for f in files
+      npm.load ->
+        cb()
       # TODO: need newer node.js to use fs.watch on Mac OS X
       #  see: https://github.com/joyent/node/issues/3343
       # fs.watch './briqs', (event, filename) ->
