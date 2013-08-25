@@ -12,6 +12,7 @@ _ = require 'underscore'
 fs = require 'fs'
 semver = require 'semver'
 
+# FIXME added check because engineStrict in package.json is not working (why?)
 nodeIsTooOld = ->
   {engines:{node}} = require '../package'
   unless semver.satisfies process.version, node

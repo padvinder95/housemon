@@ -5,6 +5,7 @@
   "version": "0.6.0",
   "author": "Jean-Claude Wippler <jc@wippler.nl>",
   "private": true,
+  "engineStrict": true,
   "engines": {
     "node": ">= 0.10"
   },
