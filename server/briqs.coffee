@@ -3,7 +3,6 @@
 ss = require 'socketstream'
 fs = require 'fs'
 local = require '../local'
-npm = require 'npm'
 
 # briqs configuration settings can now be found in local.json, under key "briqs"
 briqConfig = local.briqs or {}
@@ -84,8 +83,7 @@ module.exports = (state) ->
     fs.readdir './briqs', (err, files) ->
       throw err  if err
       loadFile f  for f in files
-      npm.load ->
-        cb()
+      cb()
       # TODO: need newer node.js to use fs.watch on Mac OS X
       #  see: https://github.com/joyent/node/issues/3343
       # fs.watch './briqs', (event, filename) ->
