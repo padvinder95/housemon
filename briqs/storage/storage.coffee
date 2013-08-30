@@ -3,17 +3,23 @@ level = require 'level'
 
 db = state.db
 
-processValue = (obj, oldObj) ->
-  dbkey = "reading~#{obj.key}~#{obj.time}"
-  db.put dbkey, obj.origval, (err) ->
+archiveValue = (time, param, value) ->
+  dbkey = "reading~#{param}~#{time}"
+  db.put dbkey, value, (err) ->
     throw err  if err
+
+storeValue = (obj, oldObj) ->
+  if obj? #therwise error on resetStatus
+    archiveValue obj.time, obj.key, obj.origval
 
 module.exports = class
   constructor: ->
-    state.on 'set.status', processValue
+    state.on 'set.status', storeValue
+    state.on 'reprocess.status', archiveValue
 
   destroy: ->
-    state.off 'set.status', processValue
+    state.off 'set.status', storeValue
+    state.off 'reprocess.status', archiveValue
 
   @rawRange: (key, from, to, cb) ->
     now = Date.now()

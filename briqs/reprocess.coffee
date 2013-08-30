@@ -31,7 +31,10 @@ processOne = (name, cb) ->
   state.emit 'reprocess.start', name
   parser.parseFile filename, ->
     state.emit 'reprocess.end', name
-    cb() # TODO it's confusing to have both events and a callack
+    # throttle a bit to let cron save to db (see archiver briq)
+    # FIXME: this still consumes way too much memory on batch reprocessing
+    setTimeout cb, 5000
+    # TODO it's a bit confusing to have both events and a callack
 
   parser.on 'other', (data) ->
     # TODO this RF12-specific stuff doesn't belong here
