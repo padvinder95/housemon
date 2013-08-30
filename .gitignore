@@ -1,11 +1,6 @@
-/archive/
 /client/static/assets/
-/histdata/
 /logger/
 /node_modules/
 /storage/
 /uploads/
 /briqs/nodeMap-local.coffee
-/housemon.log
-/briqs.json
-
