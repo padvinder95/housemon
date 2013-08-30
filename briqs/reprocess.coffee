@@ -33,7 +33,7 @@ processOne = (name, cb) ->
     state.emit 'reprocess.end', name
     # throttle a bit to let cron save to db (see archiver briq)
     # FIXME: this still consumes way too much memory on batch reprocessing
-    setTimeout cb, 5000
+    setTimeout cb, 10
     # TODO it's a bit confusing to have both events and a callack
 
   parser.on 'other', (data) ->

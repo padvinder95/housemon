@@ -25,7 +25,7 @@ aggregated = {} # in-memory cache of aggregated values
 
 archiveValue = (time, param, value) ->
   # locate (or create) the proper collector slot in the aggregation cache
-  slot = time / (MIN_PER_SLOT * 60 * 1000) | 0
+  slot = time / (MIN_PER_SLOT * 60000) | 0
   collector = aggregated[slot] ?= {}
   collector.dirty = true # tag as being modified recently
   # aggregate the value by combining it with what's already there
@@ -46,15 +46,16 @@ storeValue = (obj, oldObj) ->
   if obj? #therwise error on resetStatus
     archiveValue obj.time, obj.key, obj.origval
 
-flushSlots = (before) ->
-  cutoff = (before ? Date.now()) / MIN_PER_SLOT | 0
+flushSlots = () ->
+  cutoff = Date.now() / (MIN_PER_SLOT * 60000) | 0
+  count = 0
+  data = new Buffer(18)
   for slot, collector of aggregated
     if slot < cutoff
       if collector.dirty
         collector.dirty = false
       else
         for param, item of collector
-          data = new Buffer(18)
           data.writeUInt16LE item.cnt, 0, true
           data.writeInt32LE Math.round(item.mean), 2, true
           data.writeInt32LE item.min, 6, true
@@ -63,11 +64,9 @@ flushSlots = (before) ->
             sdev = Math.sqrt item.m2 / (item.cnt - 1)
             data.writeInt32LE Math.round(sdev), 14, true
           db.put "archive~#{param}~#{slot}", data, valueEncoding: 'binary'
-        console.info 'archive cleanup', new Date(slot * MIN_PER_SLOT)
+        count += Object.keys(aggregated[slot]).length
         delete aggregated[slot]
-
-archiveSave = (name) ->
-  console.log 'SAVE', name
+  console.info 'archive cleanup', count  if count
 
 cronTask = (minutes) ->
   flushSlots()
@@ -76,10 +75,10 @@ exports.factory = class
   constructor: ->
     state.on 'set.status', storeValue
     state.on 'reprocess.status', archiveValue
-    # state.on 'reprocess.end', archiveSave
+    state.on 'reprocess.end', flushSlots
     state.on 'minutes', cronTask
   destroy: ->
     state.off 'set.status', storeValue
     state.off 'reprocess.status', archiveValue
-    # state.off 'reprocess.end', archiveSave
+    state.off 'reprocess.end', flushSlots
     state.off 'minutes', cronTask
