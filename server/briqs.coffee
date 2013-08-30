@@ -32,7 +32,6 @@ module.exports = (state) ->
       briq = state.models.briqs[obj.briq_id]
       if briq?
         console.info 'install briq', obj.key
-        ss.api.add name, briq[name]  for name in briq.info.rpcs ? []
         # TODO nasty: the incoming obj is only used to copy some settings from
         # the actually installed bob is created using the briq's factory method
         installed[obj.key] ?= {}
@@ -46,6 +45,8 @@ module.exports = (state) ->
             # special case: strings cause delayed loading, i.e. lazy require's
             if factory.constructor is String
               factory = require "../briqs/#{obj.key}/#{factory}"
+            for name in briq.info.rpcs ? []
+              ss.api.add name, factory[name]
             bob = new factory(args...)
             bob.bobInfo?(obj) #who we are (for self referencing if we have the bobInfo method)
             #lightbulb - if we have a briq config json, we see if we need to set debug flags

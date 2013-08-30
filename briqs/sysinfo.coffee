@@ -9,15 +9,20 @@ exports.info =
 
 {exec} = require 'child_process'
 
-exports.sysInfo = (cb) ->
+exports.factory = class
+  constructor: ->
 
-  exec 'uptime', (err, up, serr) ->
-    throw err  if err
-    exec 'df -H', (err, df, serr) ->
+  destroy: ->
+
+  @sysInfo: (cb) ->
+
+    exec 'uptime', (err, up, serr) ->
       throw err  if err
-      exec 'ps xl', (err, ps, serr) ->
+      exec 'df -H', (err, df, serr) ->
         throw err  if err
-        cb null,
-          up: up
-          df: df
-          ps: ps
+        exec 'ps xl', (err, ps, serr) ->
+          throw err  if err
+          cb null,
+            up: up
+            df: df
+            ps: ps

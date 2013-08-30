@@ -17,5 +17,21 @@ processValue = (obj, oldObj) ->
 module.exports = class
   constructor: ->
     state.on 'set.status', processValue
+
   destroy: ->
     state.off 'set.status', processValue
+
+  @rawRange: (key, from, to, cb) ->
+    now = Date.now()
+    from += now  if from < 0
+    to += now  if to <= 0
+    prefix = "reading~#{key}~"
+    results = []
+    s = db.createReadStream start: prefix + from, end: prefix + to
+    s.on 'data', (data) ->
+      results.push +data.value
+      results.push +data.key.substr prefix.length
+    s.on 'error', (err) ->
+      cb err
+    s.on 'end', ->
+      cb null, results
