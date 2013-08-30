@@ -40,11 +40,12 @@ module.exports = (state) ->
           # TODO: consider using events and emit/on for all the optional calls
           bob = installed[obj.key].bob
           unless bob
-            args = obj.key.split(':').slice 1
+            args = obj.key.split(':')
+            key0 = args.shift()
             factory = briq.factory
             # special case: strings cause delayed loading, i.e. lazy require's
             if factory.constructor is String
-              factory = require "../briqs/#{briq.info.name}/#{factory}"
+              factory = require "../briqs/#{key0}/#{factory}"
             for name in briq.info.rpcs ? []
               ss.api.add name, factory[name]
             bob = new factory(args...)
