@@ -44,7 +44,7 @@ module.exports = (state) ->
             factory = briq.factory
             # special case: strings cause delayed loading, i.e. lazy require's
             if factory.constructor is String
-              factory = require "../briqs/#{obj.key}/#{factory}"
+              factory = require "../briqs/#{args[0]}/#{factory}"
             for name in briq.info.rpcs ? []
               ss.api.add name, factory[name]
             bob = new factory(args...)
