@@ -81,10 +81,7 @@ ss.http.middleware.prepend (req, res, next) ->
   state.emit 'upload', req.url, req.files  unless _.isEmpty req.files
   next()
 
-# TODO find a way to put this code inside briqs, the archiver briq in this case
-# support downloads from the "archive/" folder
-ss.http.middleware.append '/archive', ss.http.connect.directory './archive'
-ss.http.middleware.append '/archive', ss.http.connect.static './archive'
+# TODO find a way to put this code inside briqs, the logger briq in this case
 # support downloads from the "logger/" folder
 ss.http.middleware.append '/logger', ss.http.connect.directory './logger'
 ss.http.middleware.append '/logger', ss.http.connect.static './logger'
