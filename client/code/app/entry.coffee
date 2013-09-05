@@ -60,7 +60,7 @@ routes = [
   { title: 'Docs', controller: 'DocsCtrl' , route: '/docs'}
 ]
 
-app = angular.module 'app', []
+app = angular.module 'app', ['ngRoute']
 
 app.config [
   '$routeProvider','$locationProvider',
