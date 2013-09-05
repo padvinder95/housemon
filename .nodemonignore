@@ -4,9 +4,14 @@
 
 /.git/*
 /archive/*
+/rrdarchive/*
 /client/*
 /logger/*
+/storage/*
+/test/*
 /uploads/*
 /README.md
 /nohup.*
 /dump.rdb
+/docs/*
+/briqs.json.template

@@ -16,34 +16,6 @@ _ = require 'underscore'
 
 LOGGER_PATH = './logger'
 
-exports.scanLogs = (cb) ->
-  fs.readdir LOGGER_PATH, (err, dirs) ->
-    if err
-      cb err
-    else
-      logFiles = {}
-      async.eachSeries dirs, (dir, done) ->
-        dirPath = "#{LOGGER_PATH}/#{dir}"
-        fs.stat dirPath, (err, stats) ->
-          if not err and stats.isDirectory()
-            fs.readdir dirPath, (err, files) ->
-              unless err
-                logFiles[dir] = _.filter files, (name) ->
-                  dir is name.slice 0, 4
-              done err
-      , (err) ->
-        cb err, logFiles
-
-exports.reprocessLog = (name, cb) ->
-  if name.length is 4
-    fs.readdir "#{LOGGER_PATH}/#{name}", (err, files) ->
-      return cb err  if err
-      async.eachSeries files, (file, done) ->
-        processOne file, done
-      , cb
-  else
-    processOne name, cb
-
 processOne = (name, cb) ->
   parse = /^(\d\d\d\d)(\d\d)(\d\d)\./.exec name
   return cb()  unless parse
@@ -59,7 +31,10 @@ processOne = (name, cb) ->
   state.emit 'reprocess.start', name
   parser.parseFile filename, ->
     state.emit 'reprocess.end', name
-    cb() # TODO it's confusing to have both events and a callack
+    # throttle a bit to let cron save to db (see archiver briq)
+    # FIXME: this still consumes way too much memory on batch reprocessing
+    setTimeout cb, 10
+    # TODO it's a bit confusing to have both events and a callack
 
   parser.on 'other', (data) ->
     # TODO this RF12-specific stuff doesn't belong here
@@ -76,3 +51,36 @@ processOne = (name, cb) ->
     _.defaults packet, rf12info, nodeMap.rf12default
     packet.time += basetime
     state.emit 'reprocess.packet', packet
+
+exports.factory = class
+  constructor: ->
+
+  destroy: ->
+
+  @scanLogs: (cb) ->
+    fs.readdir LOGGER_PATH, (err, dirs) ->
+      if err
+        cb err
+      else
+        logFiles = {}
+        async.eachSeries dirs, (dir, done) ->
+          dirPath = "#{LOGGER_PATH}/#{dir}"
+          fs.stat dirPath, (err, stats) ->
+            if not err and stats.isDirectory()
+              fs.readdir dirPath, (err, files) ->
+                unless err
+                  logFiles[dir] = _.filter files, (name) ->
+                    dir is name.slice 0, 4
+                done err
+        , (err) ->
+          cb err, logFiles
+
+  @reprocessLog: (name, cb) ->
+    if name.length is 4
+      fs.readdir "#{LOGGER_PATH}/#{name}", (err, files) ->
+        return cb err  if err
+        async.eachSeries files, (file, done) ->
+          processOne file, done
+        , cb
+    else
+      processOne name, cb

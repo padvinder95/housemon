@@ -1,0 +1,104 @@
+// rf12input UI
+// Revision: 0.1.0 
+// Author: lightbulb -at- laughlinez.com
+//         https://github.com/TheDistractor
+// more info at: http://thedistractor.github.io/housemon/rf12input.html
+//
+// License: MIT - see http://thedistractor.github.io/housemon/MIT-LICENSE.html
+
+
+
+.row
+  .twelve.columns
+    h1 RF12Input
+    p This module allows you to send data to the RF12Registry. If any 'clients' are registered with the registry (and match your request) 
+      , the data will be sent to the client for it to 'attempt' to process.
+    p This service is very 'basic' in that it makes very little assumptions about the validity of any data you are sending
+      however, if all you want to do is write to a 'device' that is supported through the registry then this should suffice.
+    p This service supports multiple transports such as UDP/TCP/UNIX Sockets, as well as the 
+      i Write Request 
+      panel below - more information can be found in the 
+      a(href='docs/#briq-rf12input.md', target='_blank') documentation
+    p Additionally, you are able to 'listen' for write requests made through clients supporting the 'ss-rf12-write' socketstream event.
+    
+.row
+  .twelve.columns
+    h3 Send a Write Request
+    .panel
+      form.form-inline(name='writeForm')
+        .two.columns
+          label Band
+            select( style='height:32px;', ng-model='band')
+              option( value='315' ) 315
+              option( value='433' ) 433
+              option( value='868' ) 868
+              option( value='915' ) 915
+              
+        .one.columns
+          label Group        
+            input(type='text',
+              name='group',
+              ng-model='group',
+              placeholder='{{group}}')
+
+        .one.columns
+          label NodeID        
+            input(type='text',
+              name='node',
+              ng-model='node',
+              placeholder='{{node}}')
+              
+        .one.columns
+          label Header        
+            input(type='text',
+              name='header',
+              ng-model='header',
+              placeholder='{{header}}')
+              
+        .five.columns
+          label Data        
+            input(type='text',
+              name='data',
+              ng-model='data',
+              placeholder='{{data}}')
+              
+        .two.columns
+          //- removed - will add in the database io for remembered input again in next revision
+          //-br
+          //-button.btn.btn-mini(ng-disabled='true') Save              
+          //-button.btn.btn-mini(ng-disabled='true') Remove              
+              
+      .row
+        .twelve.columns
+          .four.columns
+            div(ng-show='writeResult') 
+              b >
+              {{writeResult}}
+          .eight.columns
+              input.button.right(ng-show='true', 
+                           type='submit'
+                           value='Send'
+                           ng-click='makeWriteRequest()' )
+      
+                 
+.row
+  br
+    
+.row
+  .twelve.columns
+    h3 Listen to Write Requests
+    div( ng-show='eventStack.length>0' )
+      .panel
+        table(style='width:100%;')
+          thead
+            tr
+              th Time
+              th Device
+              th Data
+          tbody
+            tr( ng-repeat='item in eventStack')
+              td {{toDate(item.datestamp).toLocaleTimeString()}} 
+              td {{item.device}} 
+              td {{item.data}}
+      
+    

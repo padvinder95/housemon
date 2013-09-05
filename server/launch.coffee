@@ -1,6 +1,6 @@
 # Web server startup, i.e. first code loaded from app.js
 
-console.error 'pid', process.pid, Date() # mark new launch in the error log
+console.warn 'pid', process.pid, Date() # mark new launch in the error log
 
 # This list is also the order in which everything gets initialised
 state = require './state'
@@ -9,6 +9,17 @@ local = require '../local'
 http = require 'http'
 ss = require 'socketstream'
 _ = require 'underscore'
+fs = require 'fs'
+semver = require 'semver'
+
+# FIXME added check because engineStrict in package.json is not working (why?)
+nodeIsTooOld = ->
+  {engines:{node}} = require '../package'
+  unless semver.satisfies process.version, node
+    console.error "Node.js #{process.version} is too old, needs to be #{node}"
+    return true
+
+process.exit 1  if nodeIsTooOld()
 
 # Auto-load all briqs from a central directory
 briqs.loadAll ->
@@ -17,7 +28,6 @@ briqs.loadAll ->
 # Hook state management into SocketStream
 ss.api.add 'fetch', state.fetch
 ss.api.add 'store', state.store
-ss.api.add 'saveNow', state.saveNow
 state.on 'publish', (hash, value) ->
   ss.api.publish.all 'ss-store', hash, value
   
@@ -32,7 +42,8 @@ ss.http.route '/', (req, res) ->
   res.serveClient 'main'
 
 # Persistent sessions and storage based on Redis
-ss.session.store.use 'redis', local.redisConfig
+# TODO replace redis by LevelDB, https://github.com/rvagg/node-level-session
+#ss.session.store.use 'redis', local.redisConfig
 # ss.publish.transport.use 'redis', local.redisConfig
 collections = ['bobs','readings','locations','drivers','uploads','status']
 state.setupStorage collections, local.redisConfig, ->
@@ -70,10 +81,7 @@ ss.http.middleware.prepend (req, res, next) ->
   state.emit 'upload', req.url, req.files  unless _.isEmpty req.files
   next()
 
-# TODO find a way to put this code inside briqs, the archiver briq in this case
-# support downloads from the "archive/" folder
-ss.http.middleware.append '/archive', ss.http.connect.directory './archive'
-ss.http.middleware.append '/archive', ss.http.connect.static './archive'
+# TODO find a way to put this code inside briqs, the logger briq in this case
 # support downloads from the "logger/" folder
 ss.http.middleware.append '/logger', ss.http.connect.directory './logger'
 ss.http.middleware.append '/logger', ss.http.connect.static './logger'
@@ -106,3 +114,15 @@ setTimeout ->
       lastMinute = minutes
   , 1000
 , 1000 - Date.now() % 1000
+
+# see https://github.com/remy/nodemon#controlling-shutdown-of-your-script
+for signal in ['SIGINT', 'SIGQUIT', 'SIGTERM', 'SIGUSR2']
+  do (signal) ->
+    process.once signal, ->
+      console.log '\nCleaning up after', signal
+      cleanupBeforeExit ->
+        process.kill process.pid, signal
+
+cleanupBeforeExit = (cb) ->
+  # nothing yet
+  cb()

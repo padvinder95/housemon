@@ -57,8 +57,11 @@ splitReading = (obj, handler) ->
   loc = findKey models.locations, locName
   unless loc
     loc = findKey models.locations, drvName
-    drvName = drvName?.replace /-.*/, ''
+    unless loc
+      loc = findKey models.locations, drvName?.replace /-.*/, ''
   drv = findKey models.drivers, drvName
+  unless drv
+    drv = findKey models.drivers, drvName?.replace /-.*/, ''
 
   if loc and drv
     for param, value of _.omit obj, 'id','key','time'

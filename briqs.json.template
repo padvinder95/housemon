@@ -1,0 +1,10 @@
+{
+  "help" : "Information about this configuration file can be found in briqs-api.md in the docs",
+  "debug": {
+    "0":false
+  },
+  "config": {
+    "sandbox":{"SomeProp":true}
+  }
+
+}

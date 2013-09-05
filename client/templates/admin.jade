@@ -1,3 +1,4 @@
+
 .row
   .three.columns
     h3(ng-show='bobs') Installed
@@ -11,55 +12,88 @@
 .row
   .three.columns
     ul.square
-      li.hover(ng-repeat='bob in bobs | filter:query | orderBy:"key"'
-         ng-click='selectBob(bob)')
-        {{bob.key}}
+      li.hover(ng-repeat='bob in bobs | filter:query | orderBy:"key"')
+        span.noOverflow(title='{{bob.key}}', 
+          ng-click='selectBob(bob)') {{bob.key}}
 
   .nine.columns
     div(ng-hide='briq')
       ul.square
-        li.hover(ng-repeat='briq in briqs | filter:query | orderBy:"info.name"'
-           ng-click='selectBriq(briq)')
-          b {{briq.info.name}}
-          |  - {{briq.info.description}}
+        li.hover(ng-repeat='briq in briqs | filter:query | orderBy:"info.name"')           
+          b.clickable( ng-click='selectBriq(briq)', title='{{briq.info.version + (briq.info.author && (" By: " + briq.info.author) || "" ) }}') {{briq.info.name}}  
+          span.subheader.clickable( ng-click='selectBriq(briq)' ) - {{briq.info.description}} 
+          span( ng-show='briq.info.briqUrl' )
+            &#160;[
+            a.btn(href='{{briq.info.briqUrl || "https://github.com/jcw/housemon/blob/master/docs/briqs.md#nohome"}}',target='_blank') ?
+            ]
+          
     div(ng-show='briq')
       .panel
-        h4 {{briq.info.name}}
-        h4.subheader {{briq.info.description}}
-        .row(ng-repeat='input in briq.info.inputs')
-          .three.columns
-            label.right.inline {{input.name}}:
-          .nine.columns(ng-switch='input.type')
-            textarea.eight(ng-switch-when='text'
-                           ng-model='input.value'
-                           ng-disabled='bob'
-                           rows=10)
-            input.four(ng-switch-default
-                       type='text'
-                       ng-model='input.value'
-                       ng-disabled='bob'
-                       placeholder='{{input.default}}')
+        .row
+          .eight.columns
+            h4 {{briq.info.name}} 
+              //-this section added by 'lightbulb' only displays if briq supports info.version            
+              small.bold( ng-show='briq.info.version')&#160;Ver: 
+                span.subheader{{briq.info.version}}
+                //-this section added by 'lightbulb' to allow briqs to provide homepage.  
+              small.subheader &#160;[
+                a.btn(href='{{briq.info.briqUrl || "https://github.com/jcw/housemon/blob/master/docs/briqs.md#nohome"}}',target='_blank') about 
+                ]
+              
+            
+          //-this section added by 'lightbulb' to allow briqs to provide homepage and author identification.  
+          .four.columns
+            div(ng-show='briq.info.author')
+              span.right by: 
+                a.subheader( ng-show='briq.info.authorUrl' , href='{{briq.info.authorUrl}}',target='_blank' ) {{briq.info.author}}
+                span.subheader(ng-hide='briq.info.authorUrl')  {{briq.info.author}}
+          
+          
+        .row 
+          .twelve.columns 
+            h4.subheader(ng-hide='briq.info.descriptionFull') {{briq.info.description}}
+            h4.subheader(ng-show='briq.info.descriptionFull', ng-bind-html-unsafe='briq.info.descriptionFull') 
+          .row(ng-repeat='input in briq.info.inputs')
+            .three.columns
+              label.right.inline {{input.name}}:
+            .nine.columns(ng-switch='input.type')
+              textarea.eight(ng-switch-when='text'
+                             ng-model='input.value'
+                             ng-disabled='bob'
+                             rows=10)
+              input.four(ng-switch-default
+                         type='text'
+                         ng-model='input.value'
+                         ng-disabled='bob'
+                         placeholder='{{input.default}}')
         .row
           .nine.columns
             input.button(type='submit'
                          value='Install'
                          ng-click='createBob()'
                          ng-disabled='bob')
+            i.subheader(ng-show='briq.info.settings && !bob')&#160;(Additional settings are available upon installation)
           .three.columns
             input.button.right(type='submit'
                                value='Remove'
                                ng-click='removeBob()'
                                ng-show='bob')
 
+      h4.subheader(ng-show='bob && briq.info.settings') Additional Settings:      
+      form(name='settingsForm')
       .row(ng-show='bob',ng-repeat='(name,setting) in briq.info.settings')
         .five.columns
           label.right.inline {{setting.title}}:
         .seven.columns
           input.four(type='text'
                      ng-model='bob[name]'
-                     ng-change='changed()'
                      placeholder='{{setting.default}}')
-
+      .twelve.columns
+        input.button.right(ng-show='bob && briq.info.settings', 
+                           type='submit'
+                           value='Update Settings'
+                           ng-click='updateBriqSettings()' )
+                     
       .row(ng-show='feeds || results')
         .two.columns
         .three.columns
@@ -69,13 +103,60 @@
           div(ng-repeat='(k,v) in feeds')
             b {{k}}
             i  - {{v}}
-        .three.columns.end(ng-show='results')
+        .three.columns(ng-show='results')
           h5 Results
           div(ng-repeat='(k,v) in results')
             b {{k}}
             i  - {{v}}
         .one.columns
-
+        
+      //-this section added by 'lightbulb' to support future debug features
+      .row(ng-show='showDebug && bob')
+        .twelve.columns
+          h5.subheader Debugging Information:        
+          .row()
+            .two.columns
+            .two.columns
+              //- Just BobInfo for now - more to follow
+              h6.subheader BobInfo:
+                a( ng-click='toggleBobInfo()')
+                  //-dont want to change hm stylesheet just yet!
+                  span(style='cursor:hand !important;cursor:pointer !important;') {{showBobInfo && '-' || '+'}}          
+            .four.columns( ng-show='showBobInfo' )
+              h6.subheader Raw Data:
+              i  {{ bob }}
+            .three.columns.end
+          .row(ng-show='supportsDebug')
+            .two.columns
+            .two.columns
+              //- toggle debug
+              input.button( type='submit', ng-disabled='! supportsDebug' , ng-click='toggleDebugBob(debugBob)', value='Debug {{debugBob && "OFF" || "ON"}}') 
+            .four.columns
+              span.subheader.right Debug is currently: {{debugBob }}
+            .four.columns( ng-show='debugBob' )
+              //
+          .row
+            br          
+          .row(ng-show='supportsDumpBob')
+            .two.columns
+            .two.columns
+              //- toggle debug
+              input.button( type='submit', ng-disabled='! supportsDumpBob' , ng-click='dumpBob()', value='Dump Bob') 
+            .eight.columns
+              
+          .row(ng-show='supportsDumpBob')
+            .two.columns
+            .ten.columns
+              .BobDump(ng-show='BobJSON')
+                code(style='') {{BobJSON }} 
+            
+            
+            
+          //- Duck Typing Proxy Debug row to place here.
+        
+        
+        
+        
 .row
   .twelve.columns
     hr

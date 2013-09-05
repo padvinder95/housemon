@@ -8,7 +8,7 @@ More info at <http://jeelabs.org/tag/housemon/>.
 
 # Installation
 
-> Note: go to [this page][B] for detailed Raspberry Pi setup instructions.
+*(Note: go to [this page][B] for detailed Raspberry Pi setup instructions)*
 
 Install [Node.js][N] (it has to be version 0.10.x) and [redis][R], then:
 
@@ -39,18 +39,9 @@ points in mind and check <http://jeelabs.org/tag/housemon/> for the latest news:
 * the "Readings" page needs drivers and mappings from node ID to that driver
 * the "Status" page also needs mappings from node ID's to named locations
 * the "archiver" and "history" briqs use status changes, so get that going first
-* the "Graphs" page only works off history data, and does not yet auto-update
+* the "Graphs" page only works off history data so far, i.e. up to 48 hours back
 
 There is some documentation in the `docs/` folder, but things *do* change fast!
-
-# Seed use
-
-To use this project as starting point for a fresh SocketStream project:
-
-* clone this project, then install all the required packages as described above
-* remove everything from the `briqs/` directory, except for `sandbox.coffee`
-* the `drivers/` directory can also be removed, since it's HouseMon-specific
-* change project name, author, version, etc. in `package.json` and `local.json`
 
 # License
 
