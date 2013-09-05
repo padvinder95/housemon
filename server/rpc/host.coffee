@@ -13,6 +13,7 @@ exports.actions = (req, res, ss) ->
       if req.session.userId isnt 1 and local.password
         console.info 'unauthorised store bobs (rpc)'
         return res null
+    # console.log 'rpc', args
     ss[cmd] args..., res
 
   authenticate: (password) ->
