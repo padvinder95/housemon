@@ -1,6 +1,3 @@
-/client/static/assets/
-/logger/
-/node_modules/
-/storage/
-/uploads/
-/briqs/nodeMap-local.coffee
+bower_components
+node_modules
+/storage

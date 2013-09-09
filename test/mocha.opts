@@ -1,3 +1,0 @@
---require chai
---compilers coffee:coffee-script
---ui bdd

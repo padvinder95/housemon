@@ -1,0 +1,7 @@
+{
+  "name": "app-rpc",
+  "version": "0.0.1",
+  "dependencies": {
+    "q-connection": "~0.5.5"
+  }
+}

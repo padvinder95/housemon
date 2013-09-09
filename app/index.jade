@@ -1,0 +1,46 @@
+!!!
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    style [ng-cloak] { display: none; }
+    
+    title Primus Live with AngularJS and Foundation
+    
+    link(rel='stylesheet',href='/normalize-css/normalize.css')
+    link(rel='stylesheet',href='/bower-foundation-css/foundation.css')
+    link(rel='stylesheet',href='/style.css')
+
+  body(ng-cloak)
+    nav.top-bar
+      ul.title-area
+        li.name
+          h1
+            a(href='#') Primus Live
+      section.top-bar-section
+        ul.left
+          li.myNav
+            a(href='/') view1
+          li.myNav
+            a(href='/view2') view2
+          li.myNav
+            a(href='/rf12demo') rf12demo
+        ul.right
+          li.myNav
+            a(href='/admin') Admin
+
+    .row
+      .small-12.large-12.columns(ui-view)
+
+    .secondary.label
+      | Angular seed app: v
+      span(app-version)
+    .label Connection: {{ serverConnection }}
+    .secondary.label @ {{ serverTick | date:'HH:mm:ss' }}
+
+    script(src='/angular/angular.js')
+    script(src='/angular-ui-router/release/angular-ui-router.js')
+    script(src='/primus/primus.js')
+    script(src='/app.js')
+    script.
+      primus = new Primus();
+      angular.bootstrap(document, ['myApp']);
