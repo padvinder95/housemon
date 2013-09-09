@@ -8,16 +8,10 @@ ng = angular.module 'myApp', [
   'rpc'
 ]
   
-ng.config [
-  '$stateProvider', '$urlRouterProvider', '$locationProvider',
-  ($stateProvider, $urlRouterProvider, $locationProvider) ->
-    $urlRouterProvider.otherwise '/'
-    $locationProvider.html5Mode true
-]
+ng.config ($stateProvider, $urlRouterProvider, $locationProvider) ->
+  $urlRouterProvider.otherwise '/'
+  $locationProvider.html5Mode true
 
-ng.directive 'appVersion', [
-  'version',
-  (version) ->
-    (scope, elm, attrs) ->
-      elm.text version
-]
+ng.directive 'appVersion', (version) ->
+  (scope, elm, attrs) ->
+    elm.text version

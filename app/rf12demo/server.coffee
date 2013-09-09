@@ -1,7 +1,3 @@
-# backing out of the Lua driver experiment for now
-# see https://github.com/jcw/housemon/issues/94
-# and commit 40f4d72fda46a1308fecdae9cce9f87d7c85817c
-
 {Serial,Parser,Decoder} = require './streamers'
 
 module.exports = (primus) ->
