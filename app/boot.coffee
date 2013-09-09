@@ -7,6 +7,8 @@ ng = angular.module 'myApp', [
   'rf12demo'
   'rpc'
 ]
+
+ng.value 'version', '0.1'
   
 ng.config ($stateProvider, $urlRouterProvider, $locationProvider) ->
   $urlRouterProvider.otherwise '/'
@@ -15,3 +17,6 @@ ng.config ($stateProvider, $urlRouterProvider, $locationProvider) ->
 ng.directive 'appVersion', (version) ->
   (scope, elm, attrs) ->
     elm.text version
+
+window.primus = new Primus();
+angular.bootstrap(document, ['myApp']);

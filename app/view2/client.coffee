@@ -20,5 +20,3 @@ ng.controller 'MyCtrl2', ($q, $scope, rpc) ->
 ng.filter 'interpolate', (version) ->
   (text) ->
     String(text).replace '%VERSION%', version
-
-ng.value 'version', '0.1'
