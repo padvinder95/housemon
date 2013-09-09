@@ -2,22 +2,16 @@ Connection = require 'q-connection'
 
 ng = angular.module 'rpc', []
 
-ng.config [
-  ->
-    primus.api = {}
-]
+ng.config ->
+  primus.api = {}
 
-ng.service 'rpc', [
-  '$q', '$rootScope',
-  ($q, $rootScope) ->
+ng.service 'rpc', ($q, $rootScope) ->
+  port =
+    postMessage: (message) ->
+      primus.write ['qcomm', message]
+    onMessage: null
 
-    port =
-      postMessage: (message) ->
-        primus.write ['qcomm', message]
-      onMessage: null
+  $rootScope.$on 'qcomm', (event, arg) ->
+    port.onmessage data: arg
 
-    $rootScope.$on 'qcomm', (event, arg) ->
-      port.onmessage data: arg
-
-    Connection port, primus.api
-]
+  Connection port, primus.api

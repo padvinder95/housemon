@@ -1,4 +1,4 @@
-{createLogStream,Replayer} = require './restream'
+{createLogStream,Replayer} = require './lib'
 
 module.exports = (primus) ->
 

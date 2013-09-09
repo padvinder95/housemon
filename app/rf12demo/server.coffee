@@ -1,4 +1,4 @@
-{Serial,Parser,Decoder} = require './streamers'
+{Serial,Parser,Decoder} = require './lib'
 
 module.exports = (primus) ->
   port = new Serial 'usb-A900ad5m'
