@@ -6,6 +6,10 @@ More info at <http://jeelabs.org/tag/housemon/>.
 
 [![Dependency Status](https://gemnasium.com/jcw/housemon.png)](https://gemnasium.com/jcw/housemon)
 
+> Note: new developments take place on the `master` branch of this repository,  
+but you most probably want a WORKING version, which is in the `0.7.x` branch.  
+The corresponding files on Github are [here](https://github.com/jcw/housemon/tree/0.7.x).
+
 # Installation
 
 *(Note: go to [this page][B] for detailed Raspberry Pi setup instructions)*
@@ -14,6 +18,7 @@ Install [Node.js][N] (it has to be version 0.10.x) and [redis][R], then:
 
     $ git clone https://github.com/jcw/housemon.git
     $ cd housemon
+    $ git checkout 0.7.x    # <== this is ESSENTIAL
     $ npm install
     
 Make sure Redis is running (this app uses database #1, see `local.json`):
