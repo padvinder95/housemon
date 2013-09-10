@@ -11,19 +11,15 @@ html(lang='en')
     link(rel='stylesheet',href='/style.css')
 
   body(ng-cloak)
-    nav.top-bar
+    nav.top-bar(ng-controller='NavCtrl')
       ul.title-area
         li.name
           h1
             a(href='#') Primus Live
       section.top-bar-section
         ul.left
-          li.myNav
-            a(href='/') view1
-          li.myNav
-            a(href='/view2') view2
-          li.myNav
-            a(href='/rf12demo') rf12demo
+          li.myNav(ng-repeat='nav in navbar')
+            a(ng-href='{{nav.route}}') {{nav.title}}
         ul.right
           li.myNav
             a(href='/admin') Admin
@@ -39,5 +35,6 @@ html(lang='en')
 
     script(src='/angular/angular.js')
     script(src='/angular-ui-router/release/angular-ui-router.js')
+    script(src='/app.js')
     script(src='/primus/primus.js')
     script(src='/boot.js')

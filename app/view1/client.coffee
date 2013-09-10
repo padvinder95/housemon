@@ -1,10 +1,11 @@
-ng = angular.module 'view1', []
+ng = angular.module 'myApp'
 
-ng.config ($stateProvider) ->
+ng.config ($stateProvider, navbarProvider) ->
   $stateProvider
     .state 'view1',
       url: '/'
       templateUrl: 'view1/view.html'
-      controller: 'MyCtrl1'
+      controller: 'View1Ctrl'
+  navbarProvider.add 'View1', '/', 11
 
-ng.controller 'MyCtrl1', ->
+ng.controller 'View1Ctrl', ->

@@ -1,16 +1,17 @@
-ng = angular.module 'view2', []
+ng = angular.module 'myApp'
 
-ng.config ($stateProvider) ->
+ng.config ($stateProvider, navbarProvider) ->
   $stateProvider
     .state 'view2',
       url: '/view2'
       templateUrl: 'view2/view.html'
-      controller: 'MyCtrl2'
+      controller: 'View2Ctrl'
+  navbarProvider.add 'View2', '/view2', 12
 
 ng.run ->
   primus.api.twice = (x) -> 2 * x
 
-ng.controller 'MyCtrl2', ($q, $scope, rpc) ->
+ng.controller 'View2Ctrl', ($q, $scope, rpc) ->
   deferred = $q.defer()
   rpc.invoke('next')
     .then (res) ->
