@@ -7,11 +7,7 @@
 
   ng = angular.module('myApp');
 
-  ng.config(function() {
-    return primus.api = {};
-  });
-
-  ng.service('rpc', function($q, $rootScope) {
+  ng.factory('rpc', function($q, $rootScope) {
     var port;
     port = {
       postMessage: function(message) {

@@ -18,3 +18,6 @@ module.exports = (app, plugin) ->
 
       spark.remote.invoke('twice', 123)
         .then (res) -> console.log 'double', res
+
+  plugin.client = (primus) ->
+    primus.api = {}

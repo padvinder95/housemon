@@ -2,9 +2,6 @@ Connection = require 'q-connection'
 
 ng = angular.module 'myApp'
 
-ng.config ->
-  primus.api = {}
-
 ng.factory 'rpc', ($q, $rootScope) ->
   port =
     postMessage: (message) ->
