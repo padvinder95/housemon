@@ -1,2 +1,2 @@
-module.exports = (app, primus) ->
+module.exports = (app, info) ->
   console.log 'admin hello'

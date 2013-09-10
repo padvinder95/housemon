@@ -1,4 +1,4 @@
-module.exports = (app, primus) ->
+module.exports = (app, info) ->
   level = require 'level'
 
   db = level './storage', {}, (err) ->

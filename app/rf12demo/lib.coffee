@@ -30,9 +30,7 @@ class Parser extends stream.Transform
         nodeId = bytes[0] & 0x1F
         @push { type: "rf12-#{nodeId}", bytes, @config }
       else if match = /^ \w i(\d+)\*? g(\d+) @ (\d\d\d) MHz/.exec data
-        @config.recvid = +match[1]
-        @config.group = +match[2]
-        @config.band = +match[3]
+        @config = { recvid: +match[1], group: +match[2], band: +match[3] }
         console.info 'RF12 config:', data
       else
         # unrecognized input, usually a "?" line
@@ -46,7 +44,11 @@ class Decoder extends stream.Transform
   _transform: (data, encoding, done) ->
     {type, bytes, info} = data
     driver = require '../drivers/' + type
-    driver.decode bytes, info, @push.bind @
+    out = driver.decode bytes, info
+    if Array.isArray out
+      @push x  for x in out
+    else
+      @push out  if out
     done()
 
 module.exports = { Serial, Parser, Decoder }

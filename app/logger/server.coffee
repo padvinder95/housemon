@@ -1,4 +1,4 @@
-module.exports = (app, primus) ->
+module.exports = (app, info) ->
   {Logger} = require './lib'
   {Replayer,createLogStream} = require '../replay/lib'
 

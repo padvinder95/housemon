@@ -1,3 +1,3 @@
 module.exports =
-  decode: (bytes, info, push) ->
+  decode: (bytes, info) ->
     console.log 'RF12:', bytes
