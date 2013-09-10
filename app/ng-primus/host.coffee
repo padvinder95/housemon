@@ -1,6 +1,8 @@
 module.exports = (app, plugin) ->
 
   plugin.server = (primus) ->
+    app.api.broadcast = primus.write.bind primus
+    
     primus.on 'connection', (spark) ->
       spark.on 'data', (arg) ->
         switch
@@ -9,4 +11,4 @@ module.exports = (app, plugin) ->
           when Array.isArray arg
             spark.emit arg...
           when arg instanceof Object
-            primus.emit 'spark', spark, arg
+            app.emit 'spark', spark, arg

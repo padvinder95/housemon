@@ -8,15 +8,15 @@ module.exports = (app, plugin) ->
 
       port =
         postMessage: (message) ->
-          spark.write ['qcomm', message]
+          spark.write ['rpc', message]
         onmessage: null
 
-      spark.on 'qcomm', (arg) ->
+      spark.on 'rpc', (arg) ->
         port.onmessage data: arg
 
       spark.remote = Connection port, app.api
 
-      spark.remote.invoke('twice', 123)
+      spark.remote.invoke('twice', 123) # defined in view2
         .then (res) -> console.log 'double', res
 
   plugin.client = (primus) ->
