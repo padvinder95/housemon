@@ -5,31 +5,27 @@
 
   Connection = require('q-connection');
 
-  ng = angular.module('rpc', []);
+  ng = angular.module('myApp');
 
-  ng.config([
-    function() {
-      return primus.api = {};
-    }
-  ]);
+  ng.config(function() {
+    return primus.api = {};
+  });
 
-  ng.service('rpc', [
-    '$q', '$rootScope', function($q, $rootScope) {
-      var port;
-      port = {
-        postMessage: function(message) {
-          return primus.write(['qcomm', message]);
-        },
-        onMessage: null
-      };
-      $rootScope.$on('qcomm', function(event, arg) {
-        return port.onmessage({
-          data: arg
-        });
+  ng.service('rpc', function($q, $rootScope) {
+    var port;
+    port = {
+      postMessage: function(message) {
+        return primus.write(['qcomm', message]);
+      },
+      onMessage: null
+    };
+    $rootScope.$on('qcomm', function(event, arg) {
+      return port.onmessage({
+        data: arg
       });
-      return Connection(port, primus.api);
-    }
-  ]);
+    });
+    return Connection(port, primus.api);
+  });
 
 }).call(this);
 

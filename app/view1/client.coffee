@@ -6,6 +6,6 @@ ng.config ($stateProvider, navbarProvider) ->
       url: '/'
       templateUrl: 'view1/view.html'
       controller: 'View1Ctrl'
-  navbarProvider.add 'View1', '/', 11
+  navbarProvider.add '/', 'View1', 11
 
 ng.controller 'View1Ctrl', ->

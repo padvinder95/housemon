@@ -6,7 +6,7 @@ ng.config ($stateProvider, navbarProvider) ->
       url: '/view2'
       templateUrl: 'view2/view.html'
       controller: 'View2Ctrl'
-  navbarProvider.add 'View2', '/view2', 12
+  navbarProvider.add '/view2', 'View2', 12
 
 ng.run ->
   primus.api.twice = (x) -> 2 * x
@@ -18,6 +18,6 @@ ng.controller 'View2Ctrl', ($q, $scope, rpc) ->
       deferred.resolve res
   $scope.counter = deferred.promise
 
-ng.filter 'interpolate', (version) ->
+ng.filter 'interpolate', (appInfo) ->
   (text) ->
-    String(text).replace '%VERSION%', version
+    String(text).replace '%VERSION%', appInfo.version

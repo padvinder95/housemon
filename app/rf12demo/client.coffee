@@ -6,6 +6,6 @@ ng.config ($stateProvider, navbarProvider) ->
       url: '/rf12demo'
       templateUrl: 'rf12demo/view.html'
       controller: 'rf12demoCtrl'
-  navbarProvider.add 'RF12demo', '/rf12demo'
+  navbarProvider.add '/rf12demo', 'RF12demo'
 
 ng.controller 'rf12demoCtrl', ->

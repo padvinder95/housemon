@@ -1,4 +1,4 @@
-ng = angular.module 'admin', []
+ng = angular.module 'myApp'
 
 ng.config ($stateProvider) ->
   $stateProvider

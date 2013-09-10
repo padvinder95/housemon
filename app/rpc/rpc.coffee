@@ -1,6 +1,6 @@
 Connection = require 'q-connection'
 
-ng = angular.module 'rpc', []
+ng = angular.module 'myApp'
 
 ng.config ->
   primus.api = {}

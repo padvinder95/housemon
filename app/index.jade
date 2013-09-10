@@ -15,7 +15,7 @@ html(lang='en')
       ul.title-area
         li.name
           h1
-            a(href='#') Primus Live
+            a(href='#') {{appInfo.name}}
       section.top-bar-section
         ul.left
           li.myNav(ng-repeat='nav in navbar')
@@ -28,13 +28,16 @@ html(lang='en')
       .small-12.large-12.columns(ui-view)
 
     .secondary.label
-      | Angular seed app: v
+      | Version 
       span(app-version)
-    .label Connection: {{ serverConnection }}
+    .label Connection: {{serverConnection}}
     .secondary.label @ {{ serverTick | date:'HH:mm:ss' }}
 
     script(src='/angular/angular.js')
     script(src='/angular-ui-router/release/angular-ui-router.js')
-    script(src='/app.js')
+    script(src='/myApp.js')
     script(src='/primus/primus.js')
-    script(src='/boot.js')
+    script.
+      primus = new Primus();
+      angular.bootstrap(document, ['myApp']);
+      
