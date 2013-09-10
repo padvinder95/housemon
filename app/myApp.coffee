@@ -1,3 +1,5 @@
+console.log 'MYAPP'
+
 ng = angular.module 'myApp', ['ui.router']
 
 ng.value 'appInfo',

@@ -2,6 +2,8 @@ level = require 'level'
 
 module.exports = (primus) ->
 
+  console.log 'STORAGE'
+  
   db = level './storage', {}, (err) ->
     throw err  if err
     if true
