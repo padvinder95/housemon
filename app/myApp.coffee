@@ -5,6 +5,7 @@ ng = angular.module 'myApp', ['ui.router']
 ng.value 'appInfo',
   name: 'HouseMon'
   version: '0.8.0'
+  home: 'https://github.com/jcw/housemon'
 
 ng.provider 'navbar', ->
   navs = []

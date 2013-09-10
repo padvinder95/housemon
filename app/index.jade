@@ -4,7 +4,7 @@ html(lang='en')
     meta(charset='utf-8')
     style [ng-cloak] { display: none; }
     
-    title Primus Live with AngularJS and Foundation
+    title Primus Live
     
     link(rel='stylesheet',href='/normalize-css/normalize.css')
     link(rel='stylesheet',href='/bower-foundation-css/foundation.css')
@@ -15,7 +15,9 @@ html(lang='en')
       ul.title-area
         li.name
           h1
-            a(href='#') {{appInfo.name}}
+            a(ng-href='{{appInfo.home}}')
+              img(src='/logo.png',height=25,width=25)
+              | &nbsp; {{appInfo.name}}
       section.top-bar-section
         ul.left
           li.myNav(ng-repeat='nav in navbar')
@@ -40,4 +42,3 @@ html(lang='en')
     script.
       primus = new Primus();
       angular.bootstrap(document, ['myApp']);
-      
