@@ -1,4 +1,4 @@
-module.exports = (app, info) ->
+module.exports = (app, plugin) ->
   {Logger} = require './lib'
   {Replayer,createLogStream} = require '../replay/lib'
 

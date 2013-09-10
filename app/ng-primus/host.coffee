@@ -1,6 +1,6 @@
-module.exports = (app, info) ->
+module.exports = (app, plugin) ->
 
-  info.server = (primus) ->
+  plugin.server = (primus) ->
     primus.on 'connection', (spark) ->
       spark.on 'data', (arg) ->
         switch

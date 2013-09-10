@@ -1,11 +1,11 @@
-module.exports = (app, info) ->
+module.exports = (app, plugin) ->
 
-  info.server = (primus) ->
+  plugin.server = (primus) ->
     setInterval ->
       primus.write Date.now()
     , 5000
 
-  info.client = (primus) ->
+  plugin.client = (primus) ->
     primus.transform 'incoming', (packet) ->
       if typeof packet.data is 'number'
         console.log 'tick', packet.data

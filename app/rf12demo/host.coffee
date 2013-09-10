@@ -1,4 +1,4 @@
-module.exports = (app, info) ->
+module.exports = (app, plugin) ->
   {Serial,Parser,Decoder} = require './lib'
 
   port = new Serial 'usb-A900ad5m'

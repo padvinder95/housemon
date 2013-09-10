@@ -1,2 +1,2 @@
-module.exports = (app, info) ->
+module.exports = (app, plugin) ->
   console.log 'admin hello'

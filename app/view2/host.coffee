@@ -1,3 +1,5 @@
-module.exports = (app, info) ->
+module.exports = (app, plugin) ->
+  
   counter = 0
-  app.api.next = -> ++counter
+  app.api.next = ->
+    ++counter

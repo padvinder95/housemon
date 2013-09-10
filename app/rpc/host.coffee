@@ -1,10 +1,9 @@
 Connection = require 'q-connection'
 
-module.exports = (app, info) ->
-
+module.exports = (app, plugin) ->
   app.api = {}
 
-  info.server = (primus) ->
+  plugin.server = (primus) ->
     primus.on 'connection', (spark) ->
 
       port =

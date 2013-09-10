@@ -1,4 +1,4 @@
-module.exports = (app, info) ->
+module.exports = (app, plugin) ->
   {createLogStream,Replayer} = require './lib'
 
   createLogStream("#{__dirname}/20121130.txt.gz")

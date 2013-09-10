@@ -1,7 +1,10 @@
-module.exports = (app, info) ->
+module.exports = (app, plugin) ->
+  app.db = setupDatabase './storage'
+
+setupDatabase = (path) ->
   level = require 'level'
 
-  db = level './storage', {}, (err) ->
+  db = level path, {}, (err) ->
     throw err  if err
     if true
       # console.log 'db opened', db.db.getProperty 'leveldb.stats'
@@ -53,4 +56,4 @@ module.exports = (app, info) ->
     .on 'end', ->
       cb result
 
-  app.db = db
+  db

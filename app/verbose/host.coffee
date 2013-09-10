@@ -1,10 +1,10 @@
-module.exports = (app, info) ->
+module.exports = (app, plugin) ->
 
-  info.server = (primus) ->
+  plugin.server = (primus) ->
     ['connection', 'disconnection', 'initialised', 'close'].forEach (type) ->
       primus.on type, (socket) ->
         console.info "primus (#{type})", new Date
 
-  info.client = (primus) ->
+  plugin.client = (primus) ->
     # only report the first error, but do it very disruptively!
     primus.once 'error', alert
