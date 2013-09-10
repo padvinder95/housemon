@@ -1,8 +1,8 @@
 Connection = require 'q-connection'
 
-module.exports = (primus) ->
+module.exports = (app, primus) ->
 
-  primus.api = {}
+  app.api = {}
 
   primus.on 'connection', (spark) ->
 
@@ -14,7 +14,7 @@ module.exports = (primus) ->
     spark.on 'qcomm', (arg) ->
       port.onmessage data: arg
 
-    spark.remote = Connection port, primus.api
+    spark.remote = Connection port, app.api
 
     spark.remote.invoke('twice', 123)
       .then (res) -> console.log 'double', res

@@ -1,4 +1,4 @@
-module.exports = (primus) ->
+module.exports = (app, primus) ->
 
   primus.on 'connection', (spark) ->
     spark.on 'data', (arg) ->

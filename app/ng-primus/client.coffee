@@ -1,5 +1,6 @@
 # define an Angular module which injects incoming events The Angular Way
 # this module must be added as dependency in the main Angular application
+
 ng = angular.module 'myApp'
 
 ng.run ($rootScope) ->

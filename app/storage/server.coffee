@@ -1,9 +1,7 @@
 level = require 'level'
 
-module.exports = (primus) ->
+module.exports = (app, primus) ->
 
-  console.log 'STORAGE'
-  
   db = level './storage', {}, (err) ->
     throw err  if err
     if true
@@ -56,4 +54,4 @@ module.exports = (primus) ->
     .on 'end', ->
       cb result
 
-  primus.db = db
+  app.db = db

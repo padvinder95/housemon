@@ -1,7 +1,7 @@
-module.exports = (app, server, primus) ->
-  console.log 'READY'
+module.exports = (app) ->
+  console.log 'LAUNCH'
 
-  primus.use 'verbose',
+  app.plugins.verbose =
     server: (primus) ->
       ['connection', 'disconnection', 'initialised', 'close'].forEach (type) ->
         primus.on type, (socket) ->
@@ -10,7 +10,7 @@ module.exports = (app, server, primus) ->
       # only report the first error, but do it very disruptively!
       primus.once 'error', alert
 
-  primus.use 'tick',
+  app.plugins.tick =
     server: (primus) ->
       setInterval ->
         primus.write Date.now()
@@ -20,4 +20,4 @@ module.exports = (app, server, primus) ->
         if typeof packet.data is 'number'
           console.log 'tick', packet.data
 
-  false
+  console.log "plugins: #{Object.keys(app.plugins)}"

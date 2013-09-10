@@ -1,4 +1,4 @@
-module.exports = (primus) ->
+module.exports = (app, primus) ->
 
   counter = 0
-  primus.api.next = -> ++counter
+  app.api.next = -> ++counter
