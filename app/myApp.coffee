@@ -1,3 +1,4 @@
+# Limited context during startup: Angular modules and Primus not yet loaded
 console.log 'MYAPP'
 
 ng = angular.module 'myApp', ['ui.router']

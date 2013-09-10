@@ -5,13 +5,16 @@ ng = angular.module 'myApp'
 
 ng.run ($rootScope) ->
 
-  # TODO 'open' event fails regularly in 1.4.0, use private event for now
-  primus.on 'incoming::open', (arg) ->
+  primus.on 'open', (arg) ->
     $rootScope.$apply -> $rootScope.serverConnection = 'open'
   primus.on 'end', (arg) ->
     $rootScope.$apply -> $rootScope.serverConnection = 'closed'
   primus.on 'reconnect', (arg) ->
     $rootScope.$apply -> $rootScope.serverConnection = 'lost'
+  primus.on 'online', (arg) ->
+    console.log 'ONLINE'
+  primus.on 'offline', (arg) ->
+    console.log 'OFFLINE'
 
   primus.on 'data', (arg) ->
     $rootScope.$apply ->

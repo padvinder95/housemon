@@ -1,6 +1,5 @@
 stream = require 'stream'
 serialport = require 'serialport'
-nodemap = require './nodemap'
 
 class Serial extends serialport.SerialPort
   constructor: (dev, baudrate = 57600) ->
@@ -29,8 +28,7 @@ class Parser extends stream.Transform
       if tokens.shift() is 'OK'
         bytes = (+x for x in tokens) # convert to ints
         nodeId = bytes[0] & 0x1F
-        type = nodemap[@config.group]?[nodeId] ? "rf12-#{nodeId}"
-        @push { type, bytes, @config }
+        @push { type: "rf12-#{nodeId}", bytes, @config }
       else if match = /^ \w i(\d+)\*? g(\d+) @ (\d\d\d) MHz/.exec data
         @config.recvid = +match[1]
         @config.group = +match[2]
