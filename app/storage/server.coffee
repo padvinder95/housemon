@@ -1,6 +1,5 @@
-level = require 'level'
-
 module.exports = (app, primus) ->
+  level = require 'level'
 
   db = level './storage', {}, (err) ->
     throw err  if err
