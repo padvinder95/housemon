@@ -65,22 +65,17 @@ class Transformer extends stream.Transform
     data = data.toString() # TODO: why is this needed?
     out = @proc data
     if Array.isArray out
-      for x in out
-        @push x
-    else if out?
-      @push out
+      @push x  for x in out
+    else
+      @push out  if out?
     done()
 
-# Take one log line and returns a packet, including timestamp and device info
+# Take one log line and return it as packet, with timestamp and device info
 logParser = (offset = 0) ->
   (line) ->
     t = /^L (\d\d):(\d\d):(\d\d)\.(\d\d\d) (\S+) (.+)/.exec line
     if t
-      time = ((parseInt(t[1], 10) * 60 +
-               parseInt(t[2], 10)) * 60 +
-               parseInt(t[3], 10)) * 1000 +
-               parseInt(t[4], 10)
-      time: time + offset
+      time: ((+t[1] * 60 + +t[2]) * 60 + +t[3]) * 1000 + +t[4] + offset
       device: t[5]
       line: t[6]
 

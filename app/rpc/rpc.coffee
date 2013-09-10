@@ -5,7 +5,7 @@ ng = angular.module 'myApp'
 ng.config ->
   primus.api = {}
 
-ng.service 'rpc', ($q, $rootScope) ->
+ng.factory 'rpc', ($q, $rootScope) ->
   port =
     postMessage: (message) ->
       primus.write ['qcomm', message]
