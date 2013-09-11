@@ -9,7 +9,16 @@ node .
 
 Some stuff is hard-coded, see `app/process/host.coffee`.
 
-*Work-in-progress... what follows are some first developer notes.*
+*Work-in-progress... what follows are some early developer notes.*
+
+----
+
+* [Plugins](#plugins)
+* [Startup](#startup)
+* [Adding Drivers](#adding-drivers)
+* [Style Guide](#style-guide)
+
+----
 
 ## Plugins
 
@@ -81,7 +90,7 @@ The general guideline for hooking into events, is to do so as late as possible:
 * the `setup` event is the place to add further information to the app registry
 * the `running` event is when actual processing activity should be started
 
-## Anatomy of a driver
+## Adding Drivers
 
 Drivers are defined as lightweight objects (only simple prototype inheritance).
 They can be defined as full plugins in their own folder, but there is also a
