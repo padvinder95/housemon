@@ -2,7 +2,7 @@ stream = require 'stream'
 fs = require 'fs'
 
 module.exports = (app, plugin) ->
-  knownDrivers = app.registry.driver ?= {}
+  driverTypes = app.registry.driver ?= {}
 
   drivers =
     unknown:
@@ -12,9 +12,9 @@ module.exports = (app, plugin) ->
   findDriver = (type) ->
     name = app.registry.nodemap[type]
     unless drivers[name]
-      unless knownDrivers[name]
+      unless driverTypes[name]
         return drivers.unknown
-      drivers[name] = knownDrivers[name] # TODO: make a copy
+      drivers[name] = Object.create driverTypes[name] # use as prototype
     drivers[name]
   
   class Dispatcher extends stream.Transform
