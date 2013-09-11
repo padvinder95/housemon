@@ -35,5 +35,5 @@ module.exports = (app, plugin) ->
   fs.readdirSync(__dirname).forEach (file) ->
     unless file is 'host.coffee'
       driver = require "./#{file}"
-      if typeof driver is 'function'
+      if typeof driver is 'function' and driver.length is 1 # i.e. one arg
         driver app
