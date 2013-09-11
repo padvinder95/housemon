@@ -3,30 +3,37 @@ fs = require 'fs'
 
 module.exports = (app, plugin) ->
   registry = app.registry
-  openDrivers = {}
+  drivers = {}
 
   class Dispatcher extends stream.Transform
     constructor: () ->
       super objectMode: true
+      
     _transform: (data, encoding, done) ->
       # locate the proper driver, or set a new one up
       name = registry.nodemap[data.type]
-      unless openDrivers[name]
+      unless drivers[name]
         driverProto = registry.driver?[name]
         unless driverProto?.decode
           console.log "driver (#{data.type})", data.msg
           return done()
-        openDrivers[name] = Object.create driverProto
+        drivers[name] = Object.create driverProto
       
-      out = openDrivers[name].decode data
+      out = drivers[name].decode data
+
+      pushOne = (msg) =>
+        if msg.tag
+          data.type = msg.tag
+          delete msg.tag # TODO: prefer a shallow copy?
+        else
+          data.type = name
+        data.msg = msg
+        @push data
 
       if Array.isArray out
-        for x in out
-          data.msg = x
-          @push data
-      else if out?
-        data.msg = out
-        @push data
+        pushOne x  for x in out
+      else
+        pushOne out  if out?
       done()
 
   app.register 'pipe.dispatcher', Dispatcher
