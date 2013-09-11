@@ -21,30 +21,29 @@ class Parser extends stream.Transform
     super objectMode: true
     @config = {}
 
-  _transform: (packet, encoding, done) ->
-    data = packet.line
-    if data.length < 300
-      tokens = data.split ' '
+  _transform: (message, encoding, done) ->
+    line = message.line
+    if line.length < 300
+      tokens = line.split ' '
       if tokens.shift() is 'OK'
-        bytes = (+x for x in tokens) # convert to ints
-        nodeId = bytes[0] & 0x1F
-        @push { type: "rf12-#{nodeId}", bytes, @config }
-      else if match = /^ \w i(\d+)\*? g(\d+) @ (\d\d\d) MHz/.exec data
+        nodeId = tokens[0] & 0x1F
+        @push { type: "rf12-#{nodeId}", line: Buffer(tokens), @config }
+      else if match = /^ \w i(\d+)\*? g(\d+) @ (\d\d\d) MHz/.exec line
         @config = { recvid: +match[1], group: +match[2], band: +match[3] }
-        console.info 'RF12 config:', data
+        console.info 'RF12 config:', line
       else
         # unrecognized input, usually a "?" line
-        @push { type: 'unknown', bytes: data, @config }
+        @push { type: 'unknown', line, @config }
     done()
 
 class Decoder extends stream.Transform
   constructor: ->
     super objectMode: true
 
-  _transform: (data, encoding, done) ->
-    {type, bytes, info} = data
+  _transform: (message, encoding, done) ->
+    {type, line, config} = message
     driver = require '../drivers/' + type
-    out = driver.decode bytes, info
+    out = driver.decode line, config
     if Array.isArray out
       @push x  for x in out
     else

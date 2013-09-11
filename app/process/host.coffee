@@ -1,13 +1,14 @@
 module.exports = (app, plugin) ->
   
-  app.on 'start', ->
+  app.on 'ready', ->
     Logger = @registry.sink.logger
     Replayer = @registry.pipe.replayer
     Serial = @registry.interface.serial
     Parser = @registry.pipe.parser
     Decoder = @registry.pipe.decoder
     createLogStream = @registry.source.logstream
-
+    TestNode = @registry.driver.testnode
+    
     createLogStream('app/replay/20121130.txt.gz')
       .pipe(new Replayer)
       .on 'data', (data) ->
@@ -18,6 +19,8 @@ module.exports = (app, plugin) ->
       .on 'open', ->
         @
           .pipe(new Parser)
-          .pipe(new Decoder)
+          .pipe(new TestNode)
           .on 'data', (data) ->
             console.log 'RF12 out:', data
+          .on 'error', (err) ->
+            console.log 'e81', err

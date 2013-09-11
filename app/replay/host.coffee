@@ -27,8 +27,8 @@ class Replayer extends stream.Transform
     super objectMode: true
     @history = []
 
-  _transform: (data, encoding, done) ->
-    @history.push data
+  _transform: (message, encoding, done) ->
+    @history.push message
     done()
 
   _flush: (done) ->
@@ -61,9 +61,8 @@ class Transformer extends stream.Transform
   constructor: (@proc) ->
     super objectMode: true
 
-  _transform: (data, encoding, done) ->
-    data = data.toString() # TODO: why is this needed?
-    out = @proc data
+  _transform: (message, encoding, done) ->
+    out = @proc message
     if Array.isArray out
       @push x  for x in out
     else
