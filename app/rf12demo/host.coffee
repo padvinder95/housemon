@@ -28,13 +28,16 @@ class Parser extends stream.Transform
       if tokens.shift() is 'OK'
         nodeId = tokens[0] & 0x1F
         prefix = if @config then "#{@config.band}:#{@config.group}:" else ''
-        @push { type: "rf12-#{prefix}#{nodeId}", msg: Buffer(tokens) }
+        data.type = "rf12-#{prefix}#{nodeId}"
+        data.msg = Buffer(tokens)
+        @push data
       else if match = /^ \w i(\d+)\*? g(\d+) @ (\d\d\d) MHz/.exec msg
         @config = { recvid: +match[1], group: +match[2], band: +match[3] }
         console.info 'RF12 config:', msg
       else
         # unrecognized input, usually a "?" msg
-        @push { type: '?', msg, @config }
+        data.type = '?'
+        @push data
     done()
 
 module.exports = (app, plugin) ->
