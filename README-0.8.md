@@ -117,9 +117,9 @@ incoming message, and which can return zero, one, or more results:
 
 Drivers can include meta data, describing the expected inputs and outputs, etc:
 
-* _announcer_ is information which can be used for automatic node discovery
-* _in_ describes the type of input data, it should always be `Buffer` for now
-* _out_ describes each of the possible output field names and types
+* **announcer** is information which can be used for automatic node discovery
+* **in** describes the type of input data, it should always be `Buffer` for now
+* **out** describes each of the possible output field names and types
 * for drivers producing multiple output types, `out` can be an array of names
 * in this case, there should be a field with further details for each each type
 * drivers can maintain state from one invocation to the next, by using _@blah_
@@ -128,8 +128,8 @@ Some more conventions:
 
 * the incoming data is in the field `msg`
 * in the case of RF12 packets, this field will contain a Buffer object
-* of the result has a `tag` field, that will be used as result type
-* otherwise, the type of result object(s) will be set to the name of the driver
+* of the result has a `tag` field, that will be added to the result
+* the type of result object(s) will always be set to the name of the driver
 * drivers should register themselves as `driver.NAME` or `driver.SUB-NAME`
 * driver names (and source file names in general) should be in lowercase
 

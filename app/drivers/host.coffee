@@ -23,10 +23,11 @@ module.exports = (app, plugin) ->
 
       pushOne = (msg) =>
         if msg.tag
-          data.type = msg.tag
+          data.tag = msg.tag
           delete msg.tag # TODO: prefer a shallow copy?
         else
-          data.type = name
+          delete data.tag
+        data.type = name
         data.msg = msg
         @push data
 
