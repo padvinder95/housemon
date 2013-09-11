@@ -1,47 +1,9 @@
-!!!
-html(lang='en')
-  head
-    meta(charset='utf-8')
-    style [ng-cloak] { display: none; }
-    
-    title Primus Live
-    
-    link(rel='stylesheet',href='/normalize-css/normalize.css')
-    link(rel='stylesheet',href='/bower-foundation-css/foundation.css')
-    link(rel='stylesheet',href='/main/style.css')
+extends main/layout
 
-  body(ng-cloak)
-    nav.top-bar(ng-controller='NavCtrl')
-      ul.title-area
-        li.name
-          h1
-            a(ng-href='{{appInfo.home}}')
-              img(src='/main/logo.png',height=21,width=21)
-              | &nbsp; {{appInfo.name}}
-      section.top-bar-section
-        ul.left
-          li.myNav(ng-repeat='nav in navbar')
-            a(ng-href='{{nav.route}}') {{nav.title}}
-        ul.right
-          li.myNav
-            a(href='/admin') Admin
+prepend styles
+  link(rel='stylesheet',href='/normalize-css/normalize.css')
+  link(rel='stylesheet',href='/bower-foundation-css/foundation.css')
 
-    .row
-      .small-12.large-12.columns(ui-view)
-
-    .secondary.label
-      | Version 
-      span(app-version)
-    .label Connection: {{serverConnection}}
-    .secondary.label @ {{ serverTick | date:'HH:mm:ss' }}
-
-    script(src='/angular/angular.js')
-    script(src='/angular-ui-router/release/angular-ui-router.js')
-    script.
-      console.log('MYAPP');
-      angular.module('myApp', ['ui.router']);
-    script(src='/primus/primus.js')
-    script.
-      console.log('BOOT');
-      primus = new Primus;
-      angular.bootstrap(document, ['myApp']);
+prepend scripts
+  script(src='/angular/angular.js')
+  script(src='/angular-ui-router/release/angular-ui-router.js')
