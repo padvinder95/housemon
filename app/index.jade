@@ -37,8 +37,11 @@ html(lang='en')
 
     script(src='/angular/angular.js')
     script(src='/angular-ui-router/release/angular-ui-router.js')
-    script(src='/myApp.js')
+    script.
+      console.log('MYAPP');
+      angular.module('myApp', ['ui.router']);
     script(src='/primus/primus.js')
     script.
-      primus = new Primus();
+      console.log('BOOT');
+      primus = new Primus;
       angular.bootstrap(document, ['myApp']);

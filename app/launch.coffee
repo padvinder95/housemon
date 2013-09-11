@@ -21,5 +21,5 @@ module.exports = (app) ->
 
   # After having been called once on startup, this module turns itself into a
   # proxy for the global "app" object by adjusting its own exports object, so
-  # "app = require 'launch'" becomes an easy way to get at the app object.
+  # "app = require '../launch'" becomes an easy way to get at the app object.
   module.exports = app
