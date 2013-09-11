@@ -1,25 +1,23 @@
 module.exports = (app) ->
 
-  # announcer: 17
-  #
-  # in: 'Buffer'
-  #
-  # out:
-  #   ['BATT']
-  #
-  # BATT:
-  #   ping:
-  #     title: 'Ping count', min: 0
-  #   age:
-  #     title: 'Estimated age', unit: 'days', min: 0
-  #   vpre:
-  #     title: 'Vcc before send', unit: 'V', min: 0, factor: 2, scale: 2
-  #   vpost:
-  #     title: 'Vcc after send', unit: 'V', min: 0, factor: 2, scale: 2
-  #   vbatt:
-  #     title: 'Battery in', unit: 'V', min: 0, factor: 2, scale: 2
-
   app.register 'driver.radioblip',
+    announcer: 17
+    in: 'Buffer'
+    out:
+      ['BATT']
+  
+    BATT:
+      ping:
+        title: 'Ping count', min: 0
+      age:
+        title: 'Estimated age', unit: 'days', min: 0
+      vpre:
+        title: 'Vcc before send', unit: 'V', min: 0, factor: 2, scale: 2
+      vpost:
+        title: 'Vcc after send', unit: 'V', min: 0, factor: 2, scale: 2
+      vbatt:
+        title: 'Battery in', unit: 'V', min: 0, factor: 2, scale: 2
+
     decode: (data) ->
       raw = data.msg
       count = raw.readUInt32LE(1)

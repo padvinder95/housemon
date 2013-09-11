@@ -13,7 +13,7 @@ module.exports = (app, plugin) ->
       name = registry.nodemap[data.type]
       unless openDrivers[name]
         driverProto = registry.driver?[name]
-        unless driverProto 
+        unless driverProto?.decode
           console.log "driver (#{data.type})", data.msg
           return done()
         openDrivers[name] = Object.create driverProto

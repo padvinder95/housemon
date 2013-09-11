@@ -1,20 +1,18 @@
 module.exports = (app) ->
 
-  # announcer: 11
-  # 
-  # in: 'Buffer'
-  # 
-  # out:
-  #   humi:
-  #     title: 'Relative humidity', unit: '%', min: 0, max: 100
-  #   light:
-  #     title: 'Light intensity', min: 0, max: 100, factor: 100/255, scale: 0
-  #   moved:
-  #     title: 'Motion', min: 0, max: 1
-  #   temp:
-  #     title: 'Temperature', unit: '°C', scale: 1, min: -50, max: 50
-
   app.register 'driver.roomnode',
+    announcer: 11
+    in: 'Buffer'
+    out:
+      humi:
+        title: 'Relative humidity', unit: '%', min: 0, max: 100
+      light:
+        title: 'Light intensity', min: 0, max: 100, factor: 100 / 255, scale: 0
+      moved:
+        title: 'Motion', min: 0, max: 1
+      temp:
+        title: 'Temperature', unit: '°C', scale: 1, min: -50, max: 50
+
     decode: (data) ->
       raw = data.msg
       t = raw.readUInt16LE(3) & 0x3FF

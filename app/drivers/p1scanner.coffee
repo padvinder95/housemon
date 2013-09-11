@@ -1,28 +1,26 @@
 module.exports = (app) ->
 
-  # announcer: 15
-  #
-  # in: 'Buffer'
-  #
-  # out:
-  #   use1:
-  #     title: 'Elec usage - low', unit: 'kWh', scale: 3, min: 0
-  #   use2:
-  #     title: 'Elec usage - high', unit: 'kWh', scale: 3, min: 0
-  #   gen1:
-  #     title: 'Elec return - low', unit: 'kWh', scale: 3, min: 0
-  #   gen2:
-  #     title: 'Elec return - high', unit: 'kWh', scale: 3, min: 0
-  #   mode:
-  #     title: 'Elec tariff'
-  #   usew:
-  #     title: 'Elec usage now', unit: 'W', scale: -1, min: 0, max: 15000
-  #   genw:
-  #     title: 'Elec return now', unit: 'W', scale: -1, min: 0, max: 10000
-  #   gas:
-  #     title: 'Gas total', unit: 'm3', scale: 3, min: 0
-
   app.register 'driver.p1scanner',
+    announcer: 15
+    in: 'Buffer'
+    out:
+      use1:
+        title: 'Elec usage - low', unit: 'kWh', scale: 3, min: 0
+      use2:
+        title: 'Elec usage - high', unit: 'kWh', scale: 3, min: 0
+      gen1:
+        title: 'Elec return - low', unit: 'kWh', scale: 3, min: 0
+      gen2:
+        title: 'Elec return - high', unit: 'kWh', scale: 3, min: 0
+      mode:
+        title: 'Elec tariff'
+      usew:
+        title: 'Elec usage now', unit: 'W', scale: -1, min: 0, max: 15000
+      genw:
+        title: 'Elec return now', unit: 'W', scale: -1, min: 0, max: 10000
+      gas:
+        title: 'Gas total', unit: 'm3', scale: 3, min: 0
+
     decode: (data) ->
       raw = data.msg
       # see http://jeelabs.org/2012/12/01/extracting-data-from-p1-packets/

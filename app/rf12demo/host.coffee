@@ -34,7 +34,7 @@ class Parser extends stream.Transform
         console.info 'RF12 config:', msg
       else
         # unrecognized input, usually a "?" msg
-        @push { type: 'unknown', msg, @config }
+        @push { type: '?', msg, @config }
     done()
 
 class Decoder extends stream.Transform

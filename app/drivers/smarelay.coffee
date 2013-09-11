@@ -1,26 +1,24 @@
 module.exports = (app) ->
 
-  # announcer: 13
-  #
-  # in: 'Buffer'
-  #
-  # out:
-  #   acw:
-  #     title: 'PV power AC', unit: 'W', min: 0, max: 6000
-  #   dcv1:
-  #     title: 'PV level east', unit: 'V', scale: 2, min: 0, max: 250
-  #   dcv2:
-  #     title: 'PV level west', unit: 'V', scale: 2, min: 0, max: 250
-  #   dcw1:
-  #     title: 'PV power east', unit: 'W', min: 0, max: 4000
-  #   dcw2:
-  #     title: 'PV power west', unit: 'W', min: 0, max: 4000
-  #   total:
-  #     title: 'PV total', unit: 'MWh', scale: 3, min: 0
-  #   yield:
-  #     title: 'PV daily yield', unit: 'kWh', scale: 3, min: 0, max: 50
-
   app.register 'driver.smarelay',
+    announcer: 13
+    in: 'Buffer'
+    out:
+      acw:
+        title: 'PV power AC', unit: 'W', min: 0, max: 6000
+      dcv1:
+        title: 'PV level east', unit: 'V', scale: 2, min: 0, max: 250
+      dcv2:
+        title: 'PV level west', unit: 'V', scale: 2, min: 0, max: 250
+      dcw1:
+        title: 'PV power east', unit: 'W', min: 0, max: 4000
+      dcw2:
+        title: 'PV power west', unit: 'W', min: 0, max: 4000
+      total:
+        title: 'PV total', unit: 'MWh', scale: 3, min: 0
+      yield:
+        title: 'PV daily yield', unit: 'kWh', scale: 3, min: 0, max: 50
+
     decode: (data) ->
       vec = (data.msg.readUInt16LE(1+2*i, true) for i in [0..6])
       result =

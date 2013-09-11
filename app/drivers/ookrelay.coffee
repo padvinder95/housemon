@@ -1,49 +1,47 @@
 module.exports = (app) ->
 
-  # announcer: 12
-  #
-  # in: 'Buffer'
-  #
-  # out:
-  #   ['DCF77', 'EMX', 'KS300', 'S300']
-  #
-  # DCF77:
-  #   date:
-  #     title: 'Date'
-  #   tod:
-  #     title: 'Time'
-  #   dst:
-  #     title: 'Summer'
-  #
-  # EMX:
-  #   seq:
-  #     title: 'Seq number'
-  #   avg:
-  #     title: 'Average power', unit: 'W', min: 0, max: 4000, factor: 12
-  #   max:
-  #     title: 'Maximum power', unit: 'W', min: 0, max: 4000, factor: 12
-  #   tot:
-  #     title: 'Total consumption', unit: 'Wh', min: 0
-  #
-  # KS300:
-  #   temp:
-  #     title: 'Temperature', unit: '°C', scale: 1
-  #   humi:
-  #     title: 'Relative humidity', unit: '%'
-  #   rain:
-  #     title: 'Precipitation'
-  #   rnow:
-  #     title: 'Raining'
-  #   wind:
-  #     title: 'Wind speed', unit: 'km/h', scale: 1
-  #
-  # S300:
-  #   temp:
-  #     title: 'Temperature', unit: '°C', scale: 1
-  #   humi:
-  #     title: 'Relative humidity', unit: '%', scale: 1
-
   app.register 'driver.ookrelay',
+    announcer: 12
+    in: 'Buffer'
+    out:
+      ['DCF77', 'EMX', 'KS300', 'S300']
+  
+    DCF77:
+      date:
+        title: 'Date'
+      tod:
+        title: 'Time'
+      dst:
+        title: 'Summer'
+  
+    EMX:
+      seq:
+        title: 'Seq number'
+      avg:
+        title: 'Average power', unit: 'W', min: 0, max: 4000, factor: 12
+      max:
+        title: 'Maximum power', unit: 'W', min: 0, max: 4000, factor: 12
+      tot:
+        title: 'Total consumption', unit: 'Wh', min: 0
+  
+    KS300:
+      temp:
+        title: 'Temperature', unit: '°C', scale: 1
+      humi:
+        title: 'Relative humidity', unit: '%'
+      rain:
+        title: 'Precipitation'
+      rnow:
+        title: 'Raining'
+      wind:
+        title: 'Wind speed', unit: 'km/h', scale: 1
+  
+    S300:
+      temp:
+        title: 'Temperature', unit: '°C', scale: 1
+      humi:
+        title: 'Relative humidity', unit: '%', scale: 1
+
     decode: (data) ->
       raw = data.msg
       out = []

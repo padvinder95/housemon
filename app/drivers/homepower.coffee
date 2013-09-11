@@ -1,27 +1,25 @@
 module.exports = (app) ->
 
-  # announcer: 16
-  #
-  # in: 'Buffer'
-  #
-  # out:
-  #   c1:
-  #     title: 'Counter stove', unit: 'kWh'
-  #     factor: 0.5, scale: 3, min: 0, max: 33
-  #   c2:
-  #     title: 'Counter solar', unit: 'kWh'
-  #     factor: 0.5, scale: 3, min: 0, max: 33
-  #   c3:
-  #     title: 'Counter house', unit: 'kWh'
-  #     factor: 0.5, scale: 3, min: 0, max: 33
-  #   p1:
-  #     title: 'Usage stove', unit: 'W', scale: 1, min: 0, max: 10000
-  #   p2:
-  #     title: 'Production solar', unit: 'W', scale: 1, min: 0, max: 10000
-  #   p3:
-  #     title: 'Usage house', unit: 'W', scale: 1, min: 0, max: 10000
-
   app.register 'driver.homepower',
+    announcer: 16  
+    in: 'Buffer'
+    out:
+      c1:
+        title: 'Counter stove', unit: 'kWh'
+        factor: 0.5, scale: 3, min: 0, max: 33
+      c2:
+        title: 'Counter solar', unit: 'kWh'
+        factor: 0.5, scale: 3, min: 0, max: 33
+      c3:
+        title: 'Counter house', unit: 'kWh'
+        factor: 0.5, scale: 3, min: 0, max: 33
+      p1:
+        title: 'Usage stove', unit: 'W', scale: 1, min: 0, max: 10000
+      p2:
+        title: 'Production solar', unit: 'W', scale: 1, min: 0, max: 10000
+      p3:
+        title: 'Usage house', unit: 'W', scale: 1, min: 0, max: 10000
+
     decode: (data) ->
       raw = data.msg
       vec = (raw.readUInt16LE(1+2*i) for i in [0..5])
