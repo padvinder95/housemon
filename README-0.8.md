@@ -81,6 +81,63 @@ The general guideline for hooking into events, is to do so as late as possible:
 * the `setup` event is the place to add further information to the app registry
 * the `running` event is when actual processing activity should be started
 
+## Anatomy of a driver
+
+Drivers are defined as lightweight objects (only simple prototype inheritance).
+They can be defined as full plugins in their own folder, but there is also a
+quicker way to define them: add a file to the `app/drivers` folder. Example:
+
+```coffee
+module.exports = (app) ->
+  app.register 'driver.testnode',
+    in: 'Buffer'
+    out:
+      batt:
+        title: 'Battery status', unit: 'V', scale: 3, min: 0, max: 5
+
+    decode: (data) ->
+      { batt: data.msg.readUInt16LE 5 }
+```
+
+The actual work is done by the `decode` function, which is called once for each
+incoming message, and which can return zero, one, or more results:
+
+* return a falsey value to indicate that there is no result
+* return an object with fields if there is one result
+* return an array of objects if there are more results (or 1, or 0)
+
+Drivers can include meta data, describing the expected inputs and outputs, etc:
+
+* _announcer_ is information which can be used for automatic node discovery
+* _in_ describes the type of input data, it should always be `Buffer` for now
+* _out_ describes each of the possible output field names and types
+* for drivers producing multiple output types, `out` can be an array of names
+* in this case, there should be a field with further details for each each type
+* drivers can maintain state from one invocation to the next, by using _@blah_
+
+Some more conventions:
+
+* the incoming data is in the field `msg`
+* in the case of RF12 packets, this field will contain a Buffer object
+* of the result has a `tag` field, that will be used as result type
+* otherwise, the type of result object(s) will be set to the name of the driver
+* drivers should register themselves as `driver.NAME` or `driver.SUB-NAME`
+* driver names (and source file names in general) should be in lowercase
+
+A driver source file can register more than one driver. The list of all
+registered drivers is available as `app.registry.drivers`.
+
+The mapping from RF12 group + node ID's is done with `nodemap` registry entries:
+
+```coffee
+app.register 'nodemap.rf12-868:42:2', 'testnode'
+```
+
+Using the nodemap entries, each incoming packet will be dispatched to the proper
+driver, which is created on-the-fly as needed.
+
+Nodemap registration needs to be done before the app enters the `running` state.
+
 ## Style Guide
 
 * 2-space indentation, no tabs
