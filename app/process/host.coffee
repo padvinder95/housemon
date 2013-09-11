@@ -23,7 +23,6 @@ module.exports = (app, plugin) ->
     Replayer = @registry.pipe.replayer
     Serial = @registry.interface.serial
     Parser = @registry.pipe.parser
-    Decoder = @registry.pipe.decoder
     Dispatcher = @registry.pipe.dispatcher
     createLogStream = @registry.source.logstream
 

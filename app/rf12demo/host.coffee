@@ -37,21 +37,6 @@ class Parser extends stream.Transform
         @push { type: '?', msg, @config }
     done()
 
-class Decoder extends stream.Transform
-  constructor: ->
-    super objectMode: true
-
-  _transform: (data, encoding, done) ->
-    {type, msg, config} = data
-    driver = require '../drivers/' + type
-    out = driver.decode msg, config
-    if Array.isArray out
-      @push x  for x in out
-    else
-      @push out  if out
-    done()
-
 module.exports = (app, plugin) ->
   app.register 'interface.serial', Serial
   app.register 'pipe.parser', Parser
-  app.register 'pipe.decoder', Decoder
