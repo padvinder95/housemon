@@ -41,8 +41,9 @@ class Logger extends stream.Writable
         console.info 'Logger: writing to', logname
         @fd = fs.openSync logname, 'a'
       # L 01:02:03.537 usb-A40117UK OK 9 25 54 66 235 61 210 226 33 19
-      {time,device,msg} = data
-      msg = "L #{timeString new Date(time)} #{device} #{msg}\n"
+      {time,dev,msg} = data
+      time ?= now.getTime()
+      msg = "L #{timeString new Date(time)} #{dev} #{msg}\n"
       fs.write @fd, Buffer(msg), 0, msg.length, null, done
     else
       fs.closeSync @fd  if @fd?

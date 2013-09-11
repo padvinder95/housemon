@@ -28,10 +28,6 @@ module.exports = (app, plugin) ->
 
     createLogStream('app/replay/20121130.txt.gz')
       .pipe(new Replayer)
-      .pipe(new Logger)
-    
-    createLogStream('app/replay/20121130.txt.gz')
-      .pipe(new Replayer)
       .pipe(new Parser)
       .pipe(new Dispatcher)
       .on 'data', (data) ->
@@ -41,6 +37,8 @@ module.exports = (app, plugin) ->
 
     new Serial('usb-A900ad5m')
       .on 'open', ->
+        @
+          .pipe(new Logger) # sink, can't chain this further
         @
           .pipe(new Parser)
           .pipe(new Dispatcher)

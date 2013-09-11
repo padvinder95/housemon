@@ -76,7 +76,7 @@ logParser = (offset = 0) ->
     if t
       type: 'line'
       time: ((+t[1] * 60 + +t[2]) * 60 + +t[3]) * 1000 + +t[4] + offset
-      device: t[5]
+      dev: t[5]
       msg: t[6]
 
 createLogStream = (fileName) ->

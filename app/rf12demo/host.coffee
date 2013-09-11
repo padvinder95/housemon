@@ -3,16 +3,20 @@ serialport = require 'serialport'
 
 class Serial extends serialport.SerialPort
   constructor: (dev, baudrate = 57600) ->
-    path = dev.replace /^usb-/, '/dev/tty.usbserial-'
+    # support some platform-specific shorthands
+    switch process.platform
+      when 'darwin' then port = dev.replace /^usb-/, '/dev/tty.usbserial-'
+      when 'linux' then port = dev.replace /^tty/, '/dev/tty'
+      else port = dev
     parser = lineEventParser dev
-    super path, { baudrate, parser }
+    super port, { baudrate, parser }
 
 lineEventParser = (dev) ->
   origParser = serialport.parsers.readline /\r?\n/
   (emitter, buffer) ->
     emit = (type, part) ->
       if type is 'data' # probably always true
-        part = { time: Date.now(), dev: dev, msg: part }
+        part = { dev: dev, msg: part }
       emitter.emit type, part
     origParser { emit }, buffer
 
