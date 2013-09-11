@@ -12,7 +12,7 @@ lineEventParser = (dev) ->
   (emitter, buffer) ->
     emit = (type, part) ->
       if type is 'data' # probably always true
-        part = { time: Date.now(), device: dev, line: part }
+        part = { time: Date.now(), dev: dev, msg: part }
       emitter.emit type, part
     origParser { emit }, buffer
 
@@ -21,29 +21,29 @@ class Parser extends stream.Transform
     super objectMode: true
     @config = {}
 
-  _transform: (message, encoding, done) ->
-    line = message.line
-    if line.length < 300
-      tokens = line.split ' '
+  _transform: (data, encoding, done) ->
+    msg = data.msg
+    if msg.length < 300
+      tokens = msg.split ' '
       if tokens.shift() is 'OK'
         nodeId = tokens[0] & 0x1F
-        @push { type: "rf12-#{nodeId}", line: Buffer(tokens), @config }
-      else if match = /^ \w i(\d+)\*? g(\d+) @ (\d\d\d) MHz/.exec line
+        @push { type: "rf12-#{nodeId}", msg: Buffer(tokens) }
+      else if match = /^ \w i(\d+)\*? g(\d+) @ (\d\d\d) MHz/.exec msg
         @config = { recvid: +match[1], group: +match[2], band: +match[3] }
-        console.info 'RF12 config:', line
+        console.info 'RF12 config:', msg
       else
-        # unrecognized input, usually a "?" line
-        @push { type: 'unknown', line, @config }
+        # unrecognized input, usually a "?" msg
+        @push { type: 'unknown', msg, @config }
     done()
 
 class Decoder extends stream.Transform
   constructor: ->
     super objectMode: true
 
-  _transform: (message, encoding, done) ->
-    {type, line, config} = message
+  _transform: (data, encoding, done) ->
+    {type, msg, config} = data
     driver = require '../drivers/' + type
-    out = driver.decode line, config
+    out = driver.decode msg, config
     if Array.isArray out
       @push x  for x in out
     else
@@ -51,6 +51,6 @@ class Decoder extends stream.Transform
     done()
 
 module.exports = (app, plugin) ->
-  app.register 'interface', 'serial', Serial
-  app.register 'pipe', 'parser', Parser
-  app.register 'pipe', 'decoder', Decoder
+  app.register 'interface.serial', Serial
+  app.register 'pipe.parser', Parser
+  app.register 'pipe.decoder', Decoder

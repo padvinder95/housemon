@@ -27,8 +27,8 @@ class Replayer extends stream.Transform
     super objectMode: true
     @history = []
 
-  _transform: (message, encoding, done) ->
-    @history.push message
+  _transform: (data, encoding, done) ->
+    @history.push data
     done()
 
   _flush: (done) ->
@@ -61,8 +61,8 @@ class Transformer extends stream.Transform
   constructor: (@proc) ->
     super objectMode: true
 
-  _transform: (message, encoding, done) ->
-    out = @proc message
+  _transform: (data, encoding, done) ->
+    out = @proc data
     if Array.isArray out
       @push x  for x in out
     else
@@ -76,7 +76,7 @@ logParser = (offset = 0) ->
     if t
       time: ((+t[1] * 60 + +t[2]) * 60 + +t[3]) * 1000 + +t[4] + offset
       device: t[5]
-      line: t[6]
+      msg: t[6]
 
 createLogStream = (fileName) ->
   t = /^(\d\d\d\d)(\d\d)(\d\d)\./.exec path.basename(fileName)
@@ -89,7 +89,7 @@ createLogStream = (fileName) ->
     .pipe(new Transformer logParser(startTime))
 
 module.exports = (app, plugin) ->
-  app.register 'pipe', 'splitter', Splitter
-  app.register 'pipe', 'transformer', Transformer
-  app.register 'pipe', 'replayer', Replayer
-  app.register 'source', 'logstream', createLogStream
+  app.register 'pipe.splitter', Splitter
+  app.register 'pipe.transformer', Transformer
+  app.register 'pipe.replayer', Replayer
+  app.register 'source.logstream', createLogStream

@@ -1,6 +1,6 @@
 module.exports = (app, plugin) ->
   
-  app.on 'ready', ->
+  app.on 'running', ->
     Logger = @registry.sink.logger
     Replayer = @registry.pipe.replayer
     Serial = @registry.interface.serial
@@ -12,7 +12,7 @@ module.exports = (app, plugin) ->
     createLogStream('app/replay/20121130.txt.gz')
       .pipe(new Replayer)
       .on 'data', (data) ->
-        console.log 'e99', data.line
+        console.log 'e99', data.msg
       .pipe(new Logger)
 
     new Serial('usb-A900ad5m')
