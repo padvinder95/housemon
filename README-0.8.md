@@ -89,7 +89,7 @@ The general guideline for hooking into events, is to do so as late as possible:
 * prefer indented if, unless, for over end-of line versions
 * lines no longer than 80 characters
 * source files preferably under 100 lines
-* file names all lower case alhpanumerics, "-" for namespacing
+* file names all lower case alphanumerics, "-" for namespacing and versioning
 * prefer small functions with good names over extensive comments
 * single empty lines where needed, no #####, etc comment dividers
 * at most three lines at the top for description, author, and license info

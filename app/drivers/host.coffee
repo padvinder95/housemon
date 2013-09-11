@@ -1,11 +1,30 @@
 stream = require 'stream'
+fs = require 'fs'
 
-class Decoder extends stream.Transform
-  constructor: ->
-    super objectMode: true
-  _transform: (data, encoding, done) ->
-    if data.type is 'rf12-2'
-      out = @decode data
+module.exports = (app, plugin) ->
+  knownDrivers = app.registry.driver ?= {}
+
+  drivers =
+    unknown:
+      decode: (data) ->
+        console.log "driver (#{data.type})", data.msg
+
+  findDriver = (type) ->
+    name = app.registry.nodemap[type]
+    unless drivers[name]
+      unless knownDrivers[name]
+        return drivers.unknown
+      drivers[name] = knownDrivers[name] # TODO: make a copy
+    drivers[name]
+  
+  class Dispatcher extends stream.Transform
+    constructor: () ->
+      super objectMode: true
+    _transform: (data, encoding, done) ->  
+      driver = findDriver data.type, app.registry.nodemap
+      unless driver
+        console.log 'e66', data
+      out = driver.decode data
       if Array.isArray out
         for x in out
           data.msg = x
@@ -13,13 +32,12 @@ class Decoder extends stream.Transform
       else if out?
         data.msg = out
         @push data
-    done()
+      done()
 
-module.exports = (app, plugin) ->
-
-  app.on 'setup', ->
-    @register 'driver.testnode', class extends Decoder
-      decode: (data) ->
-        { batt: data.msg.readUInt16LE 5 }
-    
-    @register 'nodemap.rf12-2', 'testnode'
+  app.register 'pipe.dispatcher', Dispatcher
+  
+  fs.readdirSync(__dirname).forEach (file) ->
+    unless file is 'host.coffee'
+      driver = require "./#{file}"
+      if typeof driver is 'function'
+        driver app

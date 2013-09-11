@@ -1,13 +1,15 @@
 module.exports = (app, plugin) ->
   
+  app.register 'nodemap.rf12-2', 'testnode'
+
   app.on 'running', ->
     Logger = @registry.sink.logger
     Replayer = @registry.pipe.replayer
     Serial = @registry.interface.serial
     Parser = @registry.pipe.parser
     Decoder = @registry.pipe.decoder
+    Dispatcher = @registry.pipe.dispatcher
     createLogStream = @registry.source.logstream
-    TestNode = @registry.driver.testnode
     
     createLogStream('app/replay/20121130.txt.gz')
       .pipe(new Replayer)
@@ -19,7 +21,7 @@ module.exports = (app, plugin) ->
       .on 'open', ->
         @
           .pipe(new Parser)
-          .pipe(new TestNode)
+          .pipe(new Dispatcher)
           .on 'data', (data) ->
             console.log 'RF12 out:', data
           .on 'error', (err) ->
