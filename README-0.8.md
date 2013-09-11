@@ -1,13 +1,13 @@
 # HouseMon 0.8.x
 
-There are no dependencies, other than node 0.10.x:
+There are no dependencies other than node 0.10.x:
 
 ```
 npm install
 node .
 ```
 
-Some stuff is hard-coded (e.g. app/rf12demo/server.coffee).
+Some stuff is hard-coded, see `app/process/host.coffee`.
 
 *Work-in-progress... what follows are some first developer notes.*
 
@@ -33,6 +33,12 @@ module.exports = (app, plugin) ->
 
   plugin.client = (primus) ->
     console.log 'My plugin on the client'
+
+  app.on 'ready', ->
+    console.log 'All plugins have been loaded'
+
+  app.on 'start', ->
+    console.log 'The server has been started'
 ```
 
 Once set up, these plugin objects will be available as `app.config.plugin.NAME`.
