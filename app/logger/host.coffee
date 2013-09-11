@@ -49,10 +49,3 @@ class Logger extends stream.Writable
 
 module.exports = (app, plugin) ->
   app.register 'sink', 'logger', Logger
-
-  {Replayer,createLogStream} = require '../replay/lib'
-
-  createLogStream('app/replay/20121130.txt.gz')
-    .pipe(new Replayer)
-    .pipe(new Logger)
-

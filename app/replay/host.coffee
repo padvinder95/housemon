@@ -94,8 +94,3 @@ module.exports = (app, plugin) ->
   app.register 'pipe', 'transformer', Transformer
   app.register 'pipe', 'replayer', Replayer
   app.register 'source', 'logstream', createLogStream
-
-  createLogStream("#{__dirname}/20121130.txt.gz")
-    .pipe(new Replayer)
-    .on 'data', (data) ->
-      console.log 'e99', data.line
