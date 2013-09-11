@@ -67,28 +67,28 @@ getBits = (raw, bitpos, count) ->
   
 ookDecoders =
 
-  dcf: (raw, cb) ->
+  dcf: (raw, push) ->
     bytes = (raw[i] for i in [0..5])
-    cb
+    push
       tag: 'DCF77'
       date: ((2000 + bytes[0]) * 100 + bytes[1]) * 100 + bytes[2]
       tod: bytes[3] * 100 + bytes[4]
       dst: bytes[5]
     
-  ksx: (raw, cb) ->
+  ksx: (raw, push) ->
     s = getBits(raw, 0, 4)
     switch s
       when 1
         v = (getBits(raw, i*5, 4) for i in [0..7])
         t = 100 * v[4] + 10 * v[3] + v[2]
-        cb
+        push
           tag: "S300-#{v[1]&7}"
           temp: if v[1] & 8 then -t else t
           humi: 100 * v[7] + 10 * v[6] + v[5]
       when 7
         v = (getBits(raw, i*5, 4) for i in [0..12])
         t = 100 * v[4] + 10 * v[3] + v[2]
-        cb
+        push
           tag: 'KS300'
           temp: if v[1] & 0x08 then -t else t
           humi: 10 * v[6] + v[5]
@@ -96,31 +96,31 @@ ookDecoders =
           rain: 256 * v[12] + 16 * v[11] + v[10]
           rnow: (v[1] >> 1) & 0x01
       else
-        cb
+        push
           tag: "KSX-#{s}"
           hex: raw.toString('hex').toUpperCase()
           
-  emx: (raw, cb) ->
+  emx: (raw, push) ->
     v = (getBits(raw, i*9, 8) for i in [0..8])
-    cb
+    push
       tag: "EMX-#{v[0]}:#{v[1]}"
       seq: v[2]
       avg: 256 * v[6] + v[5]
       max: 256 * v[8] + v[7]
       tot: 256 * v[4] + v[3]
       
-  fsx: (raw, cb) ->
+  fsx: (raw, push) ->
     # TODO decoding looks like it's still a bit off
     v = (getBits(raw, i*9, 8) for i in [0..4])
     # console.log 'fsx',v
     house = 256 * v[1] + v[0]
     addr = 2 * v[2] + (v[3] >> 7)
     if v[3] & 32
-      cb
+      push
         tag: "FS20X-#{house}:#{addr}"
         cmd: v[3] & 31
         ext: v[4]
     else
-      cb
+      push
         tag: "FS20-#{house}:#{addr}"
         cmd: v[3] & 31

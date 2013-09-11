@@ -74,6 +74,7 @@ logParser = (offset = 0) ->
   (line) ->
     t = /^L (\d\d):(\d\d):(\d\d)\.(\d\d\d) (\S+) (.+)/.exec line
     if t
+      type: 'line'
       time: ((+t[1] * 60 + +t[2]) * 60 + +t[3]) * 1000 + +t[4] + offset
       device: t[5]
       msg: t[6]

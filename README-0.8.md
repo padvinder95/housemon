@@ -56,9 +56,9 @@ Once set up, these plugin objects will be available as `app.config.plugin.NAME`.
 
 ## Startup
 
-Application startup can be tricky, a bit like constructing a house of cards:
+Application startup can be tricky, it's a bit like setting up a house of cards:
 
-* It starts when "`node .`" launches the primus-live package via `index.js`:
+* It all starts when "`node .`" launches the primus-live package via `index.js`:
     * `supervisor.coffee` sets itself up as a Node.js cluster
     * `preflight.coffee` scans and installs npm & bower packages found in `app`
     * then it launches a worker process running the `worker.coffee` script
