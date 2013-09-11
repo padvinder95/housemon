@@ -1,5 +1,6 @@
 module.exports = (app) ->
 
+  # out:
   #   batt:
   #     title: 'Battery status', unit: 'V', scale: 3, min: 0, max: 5
 

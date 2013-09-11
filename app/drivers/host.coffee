@@ -2,29 +2,24 @@ stream = require 'stream'
 fs = require 'fs'
 
 module.exports = (app, plugin) ->
-  driverTypes = app.registry.driver ?= {}
+  registry = app.registry
+  openDrivers = {}
 
-  drivers =
-    unknown:
-      decode: (data) ->
-        console.log "driver (#{data.type})", data.msg
-
-  findDriver = (type) ->
-    name = app.registry.nodemap[type]
-    unless drivers[name]
-      unless driverTypes[name]
-        return drivers.unknown
-      drivers[name] = Object.create driverTypes[name] # use as prototype
-    drivers[name]
-  
   class Dispatcher extends stream.Transform
     constructor: () ->
       super objectMode: true
-    _transform: (data, encoding, done) ->  
-      driver = findDriver data.type, app.registry.nodemap
-      unless driver
-        console.log 'e66', data
-      out = driver.decode data
+    _transform: (data, encoding, done) ->
+      # locate the proper driver, or set a new one up
+      name = registry.nodemap[data.type]
+      unless openDrivers[name]
+        driverProto = registry.driver?[name]
+        unless driverProto 
+          console.log "driver (#{data.type})", data.msg
+          return done()
+        openDrivers[name] = Object.create driverProto
+      
+      out = openDrivers[name].decode data
+
       if Array.isArray out
         for x in out
           data.msg = x
@@ -36,6 +31,7 @@ module.exports = (app, plugin) ->
 
   app.register 'pipe.dispatcher', Dispatcher
   
+  # load all the files found in this folder, so they can register themselves
   fs.readdirSync(__dirname).forEach (file) ->
     unless file is 'host.coffee'
       driver = require "./#{file}"

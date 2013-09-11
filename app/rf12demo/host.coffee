@@ -19,7 +19,7 @@ lineEventParser = (dev) ->
 class Parser extends stream.Transform
   constructor: ->
     super objectMode: true
-    @config = {}
+    @config = null
 
   _transform: (data, encoding, done) ->
     msg = data.msg
@@ -27,7 +27,8 @@ class Parser extends stream.Transform
       tokens = msg.split ' '
       if tokens.shift() is 'OK'
         nodeId = tokens[0] & 0x1F
-        @push { type: "rf12-#{nodeId}", msg: Buffer(tokens) }
+        prefix = if @config then "#{@config.band}:#{@config.group}:" else ''
+        @push { type: "rf12-#{prefix}#{nodeId}", msg: Buffer(tokens) }
       else if match = /^ \w i(\d+)\*? g(\d+) @ (\d\d\d) MHz/.exec msg
         @config = { recvid: +match[1], group: +match[2], band: +match[3] }
         console.info 'RF12 config:', msg

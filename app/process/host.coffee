@@ -1,6 +1,6 @@
 module.exports = (app, plugin) ->
   
-  app.register 'nodemap.rf12-2', 'testnode'
+  app.register 'nodemap.rf12-868:42:2', 'testnode'
 
   app.on 'running', ->
     Logger = @registry.sink.logger
