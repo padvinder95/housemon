@@ -26,19 +26,21 @@ Each host module gets called with two arguments: `app` (the Connect object) and
 
 ```coffee
 module.exports = (app, plugin) ->
-  console.log 'My plugin started'
-
-  plugin.server = (primus) ->
-    console.log 'My plugin on the server'
-
-  plugin.client = (primus) ->
-    console.log 'My plugin on the client'
+  console.log 'My plugin loaded'
 
   app.on 'ready', ->
     console.log 'All plugins have been loaded'
 
   app.on 'start', ->
     console.log 'The server has been started'
+
+  plugin.server = (primus) ->
+    console.log 'My plugin on the server'
+    primus.on 'connection', (spark) ->
+      console.log 'My plugin, talking to a client'
+
+  plugin.client = (primus) ->
+    console.log 'My plugin on the client'
 ```
 
 Once set up, these plugin objects will be available as `app.config.plugin.NAME`.
