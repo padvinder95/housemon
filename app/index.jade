@@ -8,7 +8,7 @@ html(lang='en')
     
     link(rel='stylesheet',href='/normalize-css/normalize.css')
     link(rel='stylesheet',href='/bower-foundation-css/foundation.css')
-    link(rel='stylesheet',href='/style.css')
+    link(rel='stylesheet',href='/main/style.css')
 
   body(ng-cloak)
     nav.top-bar(ng-controller='NavCtrl')
@@ -16,7 +16,7 @@ html(lang='en')
         li.name
           h1
             a(ng-href='{{appInfo.home}}')
-              img(src='/logo.png',height=21,width=21)
+              img(src='/main/logo.png',height=21,width=21)
               | &nbsp; {{appInfo.name}}
       section.top-bar-section
         ul.left
