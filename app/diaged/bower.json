@@ -1,0 +1,7 @@
+{
+  "name": "diaged",
+  "dependencies": {
+    "raphael": "*",
+    "eventEmitter": "*"
+  }
+}
