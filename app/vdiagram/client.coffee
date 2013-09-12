@@ -9,9 +9,15 @@ ng.config ($stateProvider, navbarProvider) ->
   navbarProvider.add '/vdiagram', 'Diagram', 33
 
 ng.controller 'DiagramCtrl', ->
-  ded = createDiagramEditor 'vdiagram', 640, 400
-  ded.addNode 50, 50, 'Oscillator 1',
-    ['Frequency','Timbre','Modulation'], ['Waveform']
-  ded.addNode 50, 180, 'Oscillator 2', ['Frequency','Shape'], ['Waveform']
-  ded.addNode 275, 100, 'Mixer', ['*Inputs'], ['Waveform','Load']
-  ded.addNode 480, 100, 'Player', ['Waveform']
+  createDiagramEditor('vdiagram', 640, 400)
+    .addNode 50, 50, 'Oscillator 1',
+      in: ['Frequency','Timbre','Modulation']
+      out: ['Waveform']
+    .addNode 50, 180, 'Oscillator 2',
+      in: ['Frequency','Shape']
+      out: ['Waveform']
+    .addNode 275, 100, 'Mixer',
+      in: ['#Inputs']
+      out: ['Waveform','Load']
+    .addNode 480, 100, 'Player',
+      in: ['Waveform']

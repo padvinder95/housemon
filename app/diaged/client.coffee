@@ -1,8 +1,9 @@
 # adapted from https://github.com/ryanwmoore/JsDataFlowEditor
 # which was forked from https://github.com/daeken/JsDataFlowEditor
+# looks like the bezier code came from http://raphaeljs.com/graffle.{html,js}
 
 window.createDiagramEditor = (domid, width, height, options) ->
-  anchor = anchorCallback = selectedNode = null
+  anchor = selectedNode = null
   nodes = []
 
   theme =
@@ -21,57 +22,41 @@ window.createDiagramEditor = (domid, width, height, options) ->
 
   allowConnection = (point) ->
 
-    point.circle.mousedown (e) =>
-      (e.originalEvent or e).preventDefault()
+    start = (x, y, e) ->
       if not point.multi and point.connections.length
-        other = point.connections[0]
-        beginning = other.circle
-        point.removeConnection other
-        anchor = other
+        anchor = point.connections[0]
+        point.removeConnection anchor
       else
         anchor = point
 
-      b = point.circle.getBBox()
-      cursor = paper.circle e.offsetX, e.offsetY, 1
-      line = paper.connection anchor.circle, cursor,
+      @cursor = paper.circle(e.offsetX, e.offsetY, 3).toFront()
+      @line = paper.connection anchor.circle, @cursor,
         theme.connectingFill,
         theme.connectingStroke + '|' + theme.connectingStrokeWidth
 
-      jo = document.getElementById(domid)
-      
-      jo.onmouseup = ->
-        cursor.remove()
-        paper.removeConnection line
-        anchor = anchorCallback = null
-        jo.onmouseup = jo.onmousemove = null
+    move = (dx, dy) ->
+      @cursor.transform ['T', dx, dy]
+      paper.connection @line
 
-      sx = sy = undefined
-      
-      jo.onmousemove = (e) ->
-        sx ?= e.pageX
-        sy ?= e.pageY
-        cursor.translate e.pageX - sx, e.pageY - sy
-        paper.connection line
-        sx = e.pageX
-        sy = e.pageY
+    end = ->
+      @cursor.remove()
+      paper.removeConnection @line
 
-      anchorCallback = (target) =>
-        unless target.dir is anchor.dir or target.parent is anchor.parent
-          anchor.connect target
-
-    # point.circle.mouseover (e) ->
-    #   console.log 'oo1', e
+    point.circle.drag move, start, end
 
     point.circle.mouseup (e) ->
-      anchorCallback? point
+      unless point.dir is anchor.dir or point.parent is anchor.parent
+        anchor.connect point
 
   class graphEditor
     
-    addNode: (x, y, title, inputs, outputs) ->
+    addNode: (x, y, title, conns) ->
+      inputs = conns.in
+      outputs = conns.out
       node = new graphNode title
 
       for input in inputs ? []
-        node.addPoint input, 'in', input[0] is '*'
+        node.addPoint input, 'in', input[0] is '#'
       for output in outputs ? []
         node.addPoint output, 'out'
       
@@ -112,7 +97,7 @@ window.createDiagramEditor = (domid, width, height, options) ->
       node.points.forEach (point) ->
         label = point.label = paper.text x, y, point.label
         label.attr fill: '#000', 'font-size': 12
-        circle = point.circle = paper.circle(x, y, 7.5)
+        circle = point.circle = paper.circle x, y, 7.5
         circle.attr stroke: '#000', fill: theme.pointInactive
         bbox = label.getBBox()
         height = bbox.height
@@ -151,6 +136,7 @@ window.createDiagramEditor = (domid, width, height, options) ->
             when 'out'
               e.circle.translate nWidth - 12, pos
               e.label.translate nWidth - 22 - e.width / 2, pos
+          e.label.drag move, start, null, rect, rect
           pos += height + 5
 
       suppressSelect = false
@@ -161,13 +147,15 @@ window.createDiagramEditor = (domid, width, height, options) ->
         else
           node.emit if node is selectedNode then 'blur' else 'focus'
 
+      title.drag move, start, null, rect, rect
       rect.drag move, start
+      @
 
   class graphNode extends EventEmitter
     constructor: (@title) ->
       @points = []
 
-      @.on 'remove', ->
+      @on 'remove', ->
         @emit 'blur'  if @ is selectedNode
         @element.remove()
         p.remove()  for p in @points
