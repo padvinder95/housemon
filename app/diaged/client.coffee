@@ -4,7 +4,6 @@
 
 window.createDiagramEditor = (domid, width, height, options) ->
   anchor = selectedNode = null
-  nodes = []
 
   theme =
     nodeFill: '#eee'
@@ -60,7 +59,6 @@ window.createDiagramEditor = (domid, width, height, options) ->
       for output in outputs ? []
         node.addPoint output, 'out'
       
-      nodes.push node
       cx = cy = null
 
       start = ->
