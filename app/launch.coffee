@@ -15,7 +15,7 @@ module.exports = (app) ->
   app.registry = {}
 
   app.register = (path, value) ->
-    console.log "registry.#{path} = #{typeof value}"
+    # console.log "registry.#{path} = #{typeof value}"
     segments = path.split '.'
     tail = segments.pop()
     lookup = @registry
