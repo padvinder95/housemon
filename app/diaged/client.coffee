@@ -112,6 +112,7 @@ window.createDiagramEditor = (domid, width, height) ->
     addNode: (x, y, title, conns) ->
       inputs = conns.in
       outputs = conns.out
+
       node = new Node title
 
       for input in inputs ? []
@@ -125,27 +126,13 @@ window.createDiagramEditor = (domid, width, height) ->
         cx = cy = 0
         
       move = (dx, dy) ->
-        group.translate dx - cx, dy - cy
+        node.group.translate dx - cx, dy - cy
         cx = dx
         cy = dy
         suppressSelect = true
-        group.toFront()
+        node.group.toFront()
         node.fixLines()
         paper.safari()
-
-      node.parent = @
-
-      node.focus = ->
-        selectedNode?.blur()  unless @ is selectedNode
-        selectedNode = @
-        group.toFront()
-        rect.attr 'stroke-width', 3
-
-      node.blur = ->
-        selectedNode = null
-        rect.attr 'stroke-width', 1
-
-      group = node.element = paper.set()
 
       height = 0
       info =
@@ -166,7 +153,7 @@ window.createDiagramEditor = (domid, width, height) ->
         e.count += 1
         e.width = bbox.width  if bbox.width > e.width
 
-        group.push label, circle.toFront()
+        node.group.push label, circle.toFront()
         allowConnection point
 
       title = paper.text(x, y, node.title)
@@ -183,7 +170,7 @@ window.createDiagramEditor = (domid, width, height) ->
       line = paper.path ['M', x, y + bbox.height + 2, 'l', nWidth, 0]
       line.attr 'stroke-width', 0.25
 
-      group.splice 0, 0, rect.toBack(), line, title
+      node.group.splice 0, 0, rect.toBack(), line, title
 
       title.translate nWidth / 2, bbox.height / 2 + 1.5
 
@@ -216,11 +203,12 @@ window.createDiagramEditor = (domid, width, height) ->
 
   class Node
     constructor: (@title) ->
+      @group = paper.set()
       @points = []
 
     remove: ->
       @blur()  if @ is selectedNode
-      @element.remove()
+      @group.remove()
       p.remove()  for p in @points
 
     addPoint: (label, dir, multi) ->
@@ -228,6 +216,18 @@ window.createDiagramEditor = (domid, width, height) ->
       @points.push npoint
       @
     
+    focus: ->
+      selectedNode?.blur()  unless @ is selectedNode
+      selectedNode = @
+      @group.toFront()
+      rect = @group[0]
+      rect.attr 'stroke-width', 3
+
+    blur: ->
+      selectedNode = null
+      rect = @group[0]
+      rect.attr 'stroke-width', 1
+
     fixLines: ->
       p.fixConnections() for p in @points
 
