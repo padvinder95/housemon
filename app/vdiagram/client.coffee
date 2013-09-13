@@ -18,6 +18,6 @@ ng.controller 'DiagramCtrl', ->
       out: ['Waveform']
     .addNode 275, 100, 'Mixer',
       in: ['#Inputs']
-      out: ['Waveform','Load']
+      out: ['Waveform']
     .addNode 480, 100, 'Player',
       in: ['Waveform']

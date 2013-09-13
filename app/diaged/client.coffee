@@ -6,7 +6,7 @@ window.createDiagramEditor = (domid, width, height, options) ->
   anchor = selectedNode = null
 
   theme =
-    nodeFill: '#eee'
+    nodeFill: '#eef'
     pointInactive: '#fff'
     pointActive: '#ccc'
     connectingFill: '#fff'
@@ -79,11 +79,12 @@ window.createDiagramEditor = (domid, width, height, options) ->
       node.on 'focus', ->
         selectedNode?.emit 'blur'  unless @ is selectedNode
         selectedNode = @
-        @element.toFront().attr 'stroke-width', 2
+        group.toFront()
+        rect.attr 'stroke-width', 3
 
       node.on 'blur', ->
         selectedNode = null
-        @element.attr 'stroke-width', 1
+        rect.attr 'stroke-width', 1
 
       group = node.element = paper.set()
 
@@ -120,12 +121,16 @@ window.createDiagramEditor = (domid, width, height, options) ->
       rect = paper.rect(x, y, nWidth, nHeight, 6)
       rect.attr fill: theme.nodeFill, 'fill-opacity': 0.9
 
-      group.splice 0, 0, rect.toBack(), title
+      # line = paper.rect(x, y + bbox.height + 2, nWidth, 0.5, 0)
+      line = paper.path ['M', x, y + bbox.height + 2, 'l', nWidth, 0]
+      line.attr 'stroke-width', 0.25
 
-      title.translate nWidth / 2, bbox.height / 2 + 3
+      group.splice 0, 0, rect.toBack(), line, title
+
+      title.translate nWidth / 2, bbox.height / 2 + 1.5
 
       for dir, column of info
-        pos = 14 + bbox.height
+        pos = 14 + bbox.height + (count - column.count) / 2 * (height + 5)
         column.elements.forEach (e) ->
           switch dir
             when 'in'
