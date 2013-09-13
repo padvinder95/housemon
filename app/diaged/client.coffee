@@ -4,7 +4,6 @@
 
 window.createDiagramEditor = (domid, width, height) ->
   anchor = selectedNode = null
-
   paper = Raphael domid, width, height
 
   allowConnection = (point) ->
@@ -32,173 +31,6 @@ window.createDiagramEditor = (domid, width, height) ->
     point.circle.mouseup (e) ->
       unless point.dir is anchor.dir or point.parent is anchor.parent
         anchor.connectTo point
-
-  class graphEditor
-    
-    addNode: (x, y, title, conns) ->
-      inputs = conns.in
-      outputs = conns.out
-      node = new graphNode title
-
-      for input in inputs ? []
-        node.addPoint input, 'in', input[0] is '#'
-      for output in outputs ? []
-        node.addPoint output, 'out'
-      
-      cx = cy = null
-
-      start = ->
-        cx = cy = 0
-        
-      move = (dx, dy) ->
-        group.translate dx - cx, dy - cy
-        cx = dx
-        cy = dy
-        suppressSelect = true
-        group.toFront()
-        p.fixConnections()  for p in node.points
-        paper.safari()
-
-      node.parent = @
-
-      node.focus = ->
-        selectedNode?.blur()  unless @ is selectedNode
-        selectedNode = @
-        group.toFront()
-        rect.attr 'stroke-width', 3
-
-      node.blur = ->
-        selectedNode = null
-        rect.attr 'stroke-width', 1
-
-      group = node.element = paper.set()
-
-      height = 0
-      info =
-        in: { elements: [], count: 0, width: 0 }
-        out: { elements: [], count: 0, width: 0 }
-
-      node.points.forEach (point) ->
-        label = point.label = paper.text x, y, point.label
-        label.attr fill: 'black', 'font-size': 12
-        circle = point.circle = paper.circle x, y, 7.5
-        circle.attr stroke: 'black', fill: 'white'
-        bbox = label.getBBox()
-        height = bbox.height
-        width = bbox.width
-
-        e = info[point.dir]
-        e.elements.push { label, width, circle }
-        e.count += 1
-        e.width = bbox.width  if bbox.width > e.width
-
-        group.push label, circle.toFront()
-        allowConnection point
-
-      title = paper.text(x, y, node.title)
-      title.attr fill: 'black', 'font-size': 16, 'font-weight': 'bold'
-      bbox = title.getBBox()
-
-      count = Math.max info.in.count, info.out.count
-      nHeight = 8 + bbox.height + count * (height + 5)
-      nWidth = 60 + Math.max(50, bbox.width, info.in.width + info.out.width)
-      
-      rect = paper.rect(x, y, nWidth, nHeight, 6)
-      rect.attr fill: '#eef', 'fill-opacity': 0.9
-
-      # line = paper.rect(x, y + bbox.height + 2, nWidth, 0.5, 0)
-      line = paper.path ['M', x, y + bbox.height + 2, 'l', nWidth, 0]
-      line.attr 'stroke-width', 0.25
-
-      group.splice 0, 0, rect.toBack(), line, title
-
-      title.translate nWidth / 2, bbox.height / 2 + 1.5
-
-      for dir, column of info
-        pos = 14 + bbox.height + (count - column.count) / 2 * (height + 5)
-        column.elements.forEach (e) ->
-          switch dir
-            when 'in'
-              e.circle.translate 12, pos
-              e.label.translate 22 + e.width / 2, pos
-            when 'out'
-              e.circle.translate nWidth - 12, pos
-              e.label.translate nWidth - 22 - e.width / 2, pos
-          e.label.drag move, start, null, rect, rect
-          pos += height + 5
-
-      suppressSelect = false
-
-      rect.click ->
-        if suppressSelect is true
-          suppressSelect = false
-        else if node is selectedNode
-          node.blur()
-        else
-          node.focus()
-
-      title.drag move, start, null, rect, rect
-      rect.drag move, start
-      @
-
-  class graphNode
-    constructor: (@title) ->
-      @points = []
-
-    remove: ->
-      @blur()  if @ is selectedNode
-      @element.remove()
-      p.remove()  for p in @points
-
-    addPoint: (label, dir, multi) ->
-      npoint = @[label] = new point(@, label, dir, multi)
-      @points.push npoint
-      @
-    
-  class point
-    constructor: (@parent, @label, @dir, @multi) ->
-      @multi ?= dir is 'out'
-      @connections = []
-      @lines = []
-    
-    remove: ->
-      for connection in @connections
-        @connection.removeTo @, true
-      for line in @lines
-        removeConnection @line
-
-    connectTo: (other, sub) ->
-      unless sub
-        if not @multi and @connections.length
-          return
-        else if not other.multi and other.connections.length
-          return
-      @connections.push other
-      @circle.attr fill: 'lightgray'
-      unless sub
-        remove = =>
-          @removeTo other
-          paper.safari()
-        other.connectTo @, true
-        line = addConnection @circle, other.circle, 'blue', 'black|3', remove
-        @lines.push line
-        other.lines.push line
-
-    removeTo: (other, sub) ->
-      for i of @connections
-        if @connections[i] is other
-          @connections.splice i, 1
-          unless sub
-            other.removeTo @, true
-            removeConnection @lines[i]
-          @lines.splice i, 1
-          break
-      @circle.attr fill: 'white'  unless @connections.length
-
-    fixConnections: ->
-      for line in @lines
-        addConnection line.from, line.to, line
-      paper.safari()
 
   addConnection = (obj1, obj2, line, bg, removeHook) ->
     bb1 = obj1.getBBox()
@@ -275,4 +107,173 @@ window.createDiagramEditor = (domid, width, height) ->
     connection.line?.remove()
     connection.bg?.remove()
 
-  new graphEditor
+  class Editor
+    
+    addNode: (x, y, title, conns) ->
+      inputs = conns.in
+      outputs = conns.out
+      node = new Node title
+
+      for input in inputs ? []
+        node.addPoint input, 'in', input[0] is '#'
+      for output in outputs ? []
+        node.addPoint output, 'out'
+      
+      cx = cy = null
+
+      start = ->
+        cx = cy = 0
+        
+      move = (dx, dy) ->
+        group.translate dx - cx, dy - cy
+        cx = dx
+        cy = dy
+        suppressSelect = true
+        group.toFront()
+        node.fixLines()
+        paper.safari()
+
+      node.parent = @
+
+      node.focus = ->
+        selectedNode?.blur()  unless @ is selectedNode
+        selectedNode = @
+        group.toFront()
+        rect.attr 'stroke-width', 3
+
+      node.blur = ->
+        selectedNode = null
+        rect.attr 'stroke-width', 1
+
+      group = node.element = paper.set()
+
+      height = 0
+      info =
+        in: { elements: [], count: 0, width: 0 }
+        out: { elements: [], count: 0, width: 0 }
+
+      node.points.forEach (point) ->
+        label = point.label = paper.text x, y, point.label
+        label.attr fill: 'black', 'font-size': 12
+        circle = point.circle = paper.circle x, y, 7.5
+        circle.attr stroke: 'black', fill: 'white'
+        bbox = label.getBBox()
+        height = bbox.height
+        width = bbox.width
+
+        e = info[point.dir]
+        e.elements.push { label, width, circle }
+        e.count += 1
+        e.width = bbox.width  if bbox.width > e.width
+
+        group.push label, circle.toFront()
+        allowConnection point
+
+      title = paper.text(x, y, node.title)
+      title.attr fill: 'black', 'font-size': 16, 'font-weight': 'bold'
+      bbox = title.getBBox()
+
+      count = Math.max info.in.count, info.out.count
+      nHeight = 8 + bbox.height + count * (height + 5)
+      nWidth = 60 + Math.max(50, bbox.width, info.in.width + info.out.width)
+      
+      rect = paper.rect(x, y, nWidth, nHeight, 6)
+      rect.attr fill: '#eef', 'fill-opacity': 0.9
+
+      line = paper.path ['M', x, y + bbox.height + 2, 'l', nWidth, 0]
+      line.attr 'stroke-width', 0.25
+
+      group.splice 0, 0, rect.toBack(), line, title
+
+      title.translate nWidth / 2, bbox.height / 2 + 1.5
+
+      for dir, column of info
+        pos = 14 + bbox.height + (count - column.count) / 2 * (height + 5)
+        column.elements.forEach (e) ->
+          switch dir
+            when 'in'
+              e.circle.translate 12, pos
+              e.label.translate 22 + e.width / 2, pos
+            when 'out'
+              e.circle.translate nWidth - 12, pos
+              e.label.translate nWidth - 22 - e.width / 2, pos
+          e.label.drag move, start, null, rect, rect
+          pos += height + 5
+
+      suppressSelect = false
+
+      rect.click ->
+        if suppressSelect is true
+          suppressSelect = false
+        else if node is selectedNode
+          node.blur()
+        else
+          node.focus()
+
+      title.drag move, start, null, rect, rect
+      rect.drag move, start
+      @
+
+  class Node
+    constructor: (@title) ->
+      @points = []
+
+    remove: ->
+      @blur()  if @ is selectedNode
+      @element.remove()
+      p.remove()  for p in @points
+
+    addPoint: (label, dir, multi) ->
+      npoint = @[label] = new Pad(@, label, dir, multi)
+      @points.push npoint
+      @
+    
+    fixLines: ->
+      p.fixConnections() for p in @points
+
+  class Pad
+    constructor: (@parent, @label, @dir, @multi) ->
+      @multi ?= dir is 'out'
+      @connections = []
+      @lines = []
+    
+    remove: ->
+      for connection in @connections
+        @connection.removeTo @, true
+      for line in @lines
+        removeConnection @line
+
+    connectTo: (other, sub) ->
+      unless sub
+        if not @multi and @connections.length
+          return
+        else if not other.multi and other.connections.length
+          return
+      @connections.push other
+      @circle.attr fill: 'lightgray'
+      unless sub
+        remove = =>
+          @removeTo other
+          paper.safari()
+        other.connectTo @, true
+        line = addConnection @circle, other.circle, 'blue', 'black|3', remove
+        @lines.push line
+        other.lines.push line
+
+    removeTo: (other, sub) ->
+      for i of @connections
+        if @connections[i] is other
+          @connections.splice i, 1
+          unless sub
+            other.removeTo @, true
+            removeConnection @lines[i]
+          @lines.splice i, 1
+          break
+      @circle.attr fill: 'white'  unless @connections.length
+
+    fixConnections: ->
+      for line in @lines
+        addConnection line.from, line.to, line
+      paper.safari()
+
+  new Editor
