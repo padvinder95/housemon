@@ -107,31 +107,32 @@ window.createDiagramEditor = (domid, width, height) ->
     connection.line?.remove()
     connection.bg?.remove()
 
-  class Editor
-    
-    addNode: (x, y, title, conns) ->
+  class Node
+    constructor: (x, y, name, conns) ->
+      @group = paper.set()
+      @pads = []
+
+      suppressSelect = false
       inputs = conns.in
       outputs = conns.out
 
-      node = new Node title
-
       for input in inputs ? []
-        node.addPoint input, 'in', input[0] is '#'
+        @addPoint input, 'in', input[0] is '#'
       for output in outputs ? []
-        node.addPoint output, 'out'
+        @addPoint output, 'out'
       
       cx = cy = null
 
       start = ->
         cx = cy = 0
         
-      move = (dx, dy) ->
-        node.group.translate dx - cx, dy - cy
+      move = (dx, dy) =>
+        @group.translate dx - cx, dy - cy
         cx = dx
         cy = dy
         suppressSelect = true
-        node.group.toFront()
-        node.fixLines()
+        @group.toFront()
+        p.fixConnections() for p in @pads
         paper.safari()
 
       height = 0
@@ -139,41 +140,45 @@ window.createDiagramEditor = (domid, width, height) ->
         in: { elements: [], count: 0, width: 0 }
         out: { elements: [], count: 0, width: 0 }
 
-      node.points.forEach (point) ->
-        label = point.label = paper.text x, y, point.label
+      # Create Raphael elements for all the parts of this node
+      for p in @pads
+        label = p.label = paper.text x, y, p.label
         label.attr fill: 'black', 'font-size': 12
-        circle = point.circle = paper.circle x, y, 7.5
+        circle = p.circle = paper.circle x, y, 7.5
         circle.attr stroke: 'black', fill: 'white'
         bbox = label.getBBox()
         height = bbox.height
         width = bbox.width
 
-        e = info[point.dir]
+        e = info[p.dir]
         e.elements.push { label, width, circle }
         e.count += 1
         e.width = bbox.width  if bbox.width > e.width
 
-        node.group.push label, circle.toFront()
-        allowConnection point
+        @group.push label, circle.toFront()
+        allowConnection p
 
-      title = paper.text(x, y, node.title)
+      # The name shown at the top of the node
+      title = paper.text(x, y, name)
       title.attr fill: 'black', 'font-size': 16, 'font-weight': 'bold'
       bbox = title.getBBox()
 
+      # Total dimensions, now that all the pieces are known
       count = Math.max info.in.count, info.out.count
       nHeight = 8 + bbox.height + count * (height + 5)
       nWidth = 60 + Math.max(50, bbox.width, info.in.width + info.out.width)
       
+      # The actual node rectangle and separator line
       rect = paper.rect(x, y, nWidth, nHeight, 6)
       rect.attr fill: '#eef', 'fill-opacity': 0.9
-
       line = paper.path ['M', x, y + bbox.height + 2, 'l', nWidth, 0]
       line.attr 'stroke-width', 0.25
 
-      node.group.splice 0, 0, rect.toBack(), line, title
+      # Insert the rectangle, separator line, and title at the front
+      @group.splice 0, 0, rect.toBack(), line, title
 
+      # Move all the parts to their proper coordinates
       title.translate nWidth / 2, bbox.height / 2 + 1.5
-
       for dir, column of info
         pos = 14 + bbox.height + (count - column.count) / 2 * (height + 5)
         column.elements.forEach (e) ->
@@ -187,34 +192,26 @@ window.createDiagramEditor = (domid, width, height) ->
           e.label.drag move, start, null, rect, rect
           pos += height + 5
 
-      suppressSelect = false
-
-      rect.click ->
+      # Node selection and deselection
+      rect.click =>
         if suppressSelect is true
           suppressSelect = false
-        else if node is selectedNode
-          node.blur()
+        else if @ is selectedNode
+          @blur()
         else
-          node.focus()
+          @focus()
 
+      # Dragging nodes around (see also the label drag calls above)
       title.drag move, start, null, rect, rect
       rect.drag move, start
-      @
-
-  class Node
-    constructor: (@title) ->
-      @group = paper.set()
-      @points = []
 
     remove: ->
       @blur()  if @ is selectedNode
       @group.remove()
-      p.remove()  for p in @points
+      p.remove()  for p in @pads
 
     addPoint: (label, dir, multi) ->
-      npoint = @[label] = new Pad(@, label, dir, multi)
-      @points.push npoint
-      @
+      @pads.push new Pad(@, label, dir, multi)
     
     focus: ->
       selectedNode?.blur()  unless @ is selectedNode
@@ -227,9 +224,6 @@ window.createDiagramEditor = (domid, width, height) ->
       selectedNode = null
       rect = @group[0]
       rect.attr 'stroke-width', 1
-
-    fixLines: ->
-      p.fixConnections() for p in @points
 
   class Pad
     constructor: (@parent, @label, @dir, @multi) ->
@@ -245,9 +239,7 @@ window.createDiagramEditor = (domid, width, height) ->
 
     connectTo: (other, sub) ->
       unless sub
-        if not @multi and @connections.length
-          return
-        else if not other.multi and other.connections.length
+        unless @canConnect() and other.canConnect()
           return
       @connections.push other
       @circle.attr fill: 'lightgray'
@@ -271,9 +263,14 @@ window.createDiagramEditor = (domid, width, height) ->
           break
       @circle.attr fill: 'white'  unless @connections.length
 
+    canConnect: ->
+      @multi or @connections.length is 0
+
     fixConnections: ->
       for line in @lines
         addConnection line.from, line.to, line
       paper.safari()
 
-  new Editor
+  addNode: (args...) ->
+    new Node args...
+    @
