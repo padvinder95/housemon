@@ -28,7 +28,7 @@ window.createDiagramEditor = (domid) ->
     wire = paper.path().toBack()
       .attr
         stroke: 'darkblue', 'stroke-width': 3
-        path: generatePath(from.eltId, to.eltId)
+        path: generatePath from.eltId, to.eltId
       .data
         from: from, to: to
 
@@ -117,9 +117,18 @@ window.createDiagramEditor = (domid) ->
 
   addNode: (node) ->
     context = @ # FIXME: should use events, see makeConnectable/end/addWire
+
+    # choose defaults for x and y if needed
+    node.x ?= paper.width >> 1
+    node.y ?= paper.height >> 1
+
+    # make sure the node ID is present and unique
+    node.id ?= Date.now()
+    node.id += 1  while @nodes[node.id]?
+
     {id,name,x,y,pads} = node
     @nodes[id] = node
-    group = @groups[id] = paper.set()
+    @groups[id] = group = paper.set()
 
     circles = [] # will add this to group after making the rest draggable
     height = 0
@@ -134,7 +143,7 @@ window.createDiagramEditor = (domid) ->
         cx = cy = 0
         set.toFront()
         
-      move = (dx, dy, x, y) ->
+      move = (dx, dy) ->
         set.translate dx - cx, dy - cy
         cx = dx
         cy = dy
@@ -238,7 +247,7 @@ window.createDiagramEditor = (domid) ->
     # Insert the rectangle, separator line, and title at the front
     group.splice 0, 0, rect.toBack(), sep, title
     makeDraggable group
-    group.push circles... # these too get dragged, but they can't start one
+    group.push circles... # these too get dragged, but they can't start a drag
     @
 
   removeNode: (id) ->

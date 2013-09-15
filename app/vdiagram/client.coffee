@@ -11,7 +11,6 @@ ng.config ($stateProvider, navbarProvider) ->
 ng.controller 'DiagramCtrl', ->
   diagram = createDiagramEditor('vdiagram')
     .addNode
-      id: 1
       name: 'Oscillator'
       x: 50
       y: 50
@@ -46,8 +45,6 @@ ng.controller 'DiagramCtrl', ->
     .addNode
       id: 4
       name: 'Player'
-      x: 480
-      y: 100
       pads:
         'waveform': {}
     .wireItUp()
