@@ -1,6 +1,6 @@
 exports.info =
   name: 'history'
-  description: 'Historical data storage (full details of the last few days)'
+  description: 'Historical data storage (DEPRECATED, use the "storage" briq)'
   rpcs: ['rawRange']
   connections:
     feeds:
@@ -42,17 +42,6 @@ storeValue = (obj, oldObj) ->
       db.zadd 'hist:keys', lastId, key, ->
     db.zadd "hist:#{keyMap[key]}", obj.time, obj.origval, ->
 
-# callable from client as rpc
-exports.rawRange = (key, from, to, cb) ->
-  now = Date.now()
-  from += now  if from < 0
-  to += now  if to <= 0
-  id = keyMap[key]
-  if id? and dbReady
-    db.zrangebyscore "hist:#{id}", from, to, 'withscores', cb
-  else
-    cb null, []
-
 cronTask = (minutes) ->
   if minutes is 35 # clean up once an hour
     console.info 'history cleanup started'
@@ -67,6 +56,18 @@ exports.factory = class
   constructor: ->
     state.on 'set.status', storeValue
     state.on 'minutes', cronTask
+
   destroy: ->
     state.off 'set.status', storeValue
     state.off 'minutes', cronTask
+
+  # callable from client as rpc
+  @rawRange: (key, from, to, cb) ->
+    now = Date.now()
+    from += now  if from < 0
+    to += now  if to <= 0
+    id = keyMap[key]
+    if id? and dbReady
+      db.zrangebyscore "hist:#{id}", from, to, 'withscores', cb
+    else
+      cb null, []

@@ -58,10 +58,10 @@ See also this issue on GitHub: <https://github.com/jcw/housemon/issues/38>
 There is a "develop" branch on GitHub where all the latest features and fixes
 are being added. To follow these changes, enter the following command once:
 
-    cd ~/housemon && git branch develop
+    cd ~/housemon && git checkout develop
 
 To restore the release version, enter this instead:
 
-    cd ~/housemon && git branch master
+    cd ~/housemon && git checkout master
 
 Warning: the development branch changes - *and breaks* - much more frequently!

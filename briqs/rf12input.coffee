@@ -1,6 +1,6 @@
 ###
 #   BRIQ: rf12input 
-#   Version: 0.1.0
+#   Version: 0.1.2
 #   Author: lightbulb -at- laughlinez (dot) com
 #           https://github.com/TheDistractor
 #   more info at: http://thedistractor.github.io/housemon/rf12input.html
@@ -19,17 +19,20 @@
 #
 #   Updated: 0.1.1 - supports basic debug 
 #                  - small tidyup
+#                  - added in missing UDP listener
 ###
 
 
 #we set our requires above exports so we can use them inline
 net = require('net')
+dgram = require('dgram')
+Stream = require('stream')
 readline  = require('readline')
 state = require '../server/state'
 ss = require 'socketstream'
 
 exports.info =
-  version: '0.1.1'  
+  version: '0.1.2'  
   name: 'rf12input'
   description: 'Provides input support using multiple transports for the RF12 Registry Service'
   descriptionHtml: 'This module installs listeners on various transport mechanisms (like UDP/TCP/UNIX Sockets etc.) to help you establish write requests to RF12Registry clients.<br />Use the link above to obtain the detailed manual.'
@@ -54,18 +57,18 @@ class RF12Input
 
   
     #setup instance variables
-    @_debug = false 
+    @_debug = true
     @_registry = new RF12RegistryManager.Registry() #this will broadcast in 50ms
     
     @fs = require('fs');
 
     #should have these as configurations - next rev?
     @TCP_PORT = 3334
+    @UDP_PORT = 3334
     @DOMAIN_SOCK = '/tmp/rf12input.sock'
     @Dserver = {} #domain socket object
     @Tserver = {} #tcp socket object
-
-    
+    @Userver = {} #udp socket object
 
       
   inited: ->
@@ -107,7 +110,7 @@ class RF12Input
         console.log 'server disconnected' if self._debug
   
     @Dserver.listen @DOMAIN_SOCK, () ->
-      console.log 'server bound: ' + self.DOMAIN_SOCK if self._debug
+      console.log 'Domain server bound: ' + self.DOMAIN_SOCK if self._debug
       
     #============================================
  
@@ -130,9 +133,55 @@ class RF12Input
         console.log 'server disconnected' if self._debug
   
     @Tserver.listen @TCP_PORT, () ->
-      console.log 'server bound :' + self.TCP_PORT if self._debug
+      console.log 'tcp server bound :' + self.TCP_PORT if self._debug
     #===============================================
 
+    #============================================
+    #create UDP socket server
+    @Userver = dgram.createSocket ('udp4')
+    
+    @Userver.on 'listening', () =>
+      address = @Userver.address()
+      console.log "UDP Bound to #{address.address} #{address.port}"  if self._debug
+    
+    @Userver.on 'message', (msg,rinfo) ->
+        console.log "UDP Socket client connect" if self._debug
+
+        #simulate readline behaviour (rough but ready - removes trailing \n)
+        buf = msg
+        for i in [ (msg.length - 1 ) .. 0]
+          if msg[i] == '\n'.charCodeAt(0)
+            msg[i] = 0
+            buf = msg.slice 0, i
+            break
+
+        hlp = self.getHelp()
+        
+        #Note - this requires Streams2 on node 0.10+
+        ws = new Stream.Writable
+        ws._write = (chunk,enc,next) ->
+              
+          self.Userver.send chunk, 0, chunk.length, rinfo.port,rinfo.address, (err, bytes) =>
+            console.log "UDP Sent #{bytes} bytes"  if self._debug
+          next()
+        
+        ws.write hlp
+
+        #note: unlikely but possible for packet to be fragmented and msg would not be a full command sequence
+        #this would require a more robust readline style buffer.
+        self.processInput buf.toString(), ws
+      
+        ws.end()
+      
+       
+    @Userver.on 'close', () -> 
+        console.log 'UDP server disconnected' if self._debug
+  
+      
+    @Userver.bind @UDP_PORT 
+      
+    #===============================================
+    
   setDebug : (flag) =>
     return @_debug = flag
   getDebug : () =>
@@ -142,11 +191,22 @@ class RF12Input
       @DOMAIN_SOCK = obj.DomainSocket
     if obj?.Port?    
       @TCP_PORT = obj.Port
+    if obj?.UDPPort?    
+      @UDP_PORT = obj.UDPPort
       
-    
-  help: (stream) =>
-    stream.write "syntax send <band> <group> <node> <header> <command>\n"
-     
+  
+  help: (obj) =>
+    console.log obj.write?
+    if obj.write? 
+      obj.write @getHelp()
+    else
+      return @getHelp()
+  
+  getHelp: () =>
+    return new Buffer "syntax send <band> <group> <node> <header> <command>\n"
+  
+
+  
   processInput: (line, stream) =>
     console.log 'Processing:' + line if @_debug
     stream.write 'Processing: ' + line + '\n'
@@ -175,17 +235,44 @@ class RF12Input
     console.log "RF12Write Called within RF12Input Briq -> about to call socketstream ss.api.publish.all 'ss-rf12-write'"  if @_debug
     console.log "Data is:" , data if @_debug
     ss.api.publish.all 'ss-rf12-write', data
+
+  close: =>
+    console.log "Close() - rf12input" if @_debug
+    state.off 'rf12.write', @RF12WriteListener
+    try
+      @_registry.destroy()
+    catch err
+    finally
+    try
+      @Dserver.close() 
+    catch err
+    finally
+    try
+      @Tserver.close()
+    catch err
+    finally
+    try
+      @Userver.close()
+    catch err
+    finally
+    try
+      @Dserver.unref()
+    catch err
+    finally
+    try
+      @Tserver.unref()
+    catch err
+    finally
+    try
+      @Userver.unref()
+    catch err
+    finally
+  
     
     
   destroy: => 
     console.log "Destroy - cleaning up rf12input" if @_debug
-    state.off 'rf12.write', @RF12WriteListener
-    @_registry.destroy()
-    @Dserver.close() 
-    @Tserver.close()
-    @Dserver.unref()
-    @Tserver.unref()
-
+    @close()
 
 exports.factory = RF12Input
 
