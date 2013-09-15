@@ -6,18 +6,58 @@ ng.config ($stateProvider, navbarProvider) ->
       url: '/vdiagram'
       templateUrl: 'vdiagram/view.html'
       controller: 'DiagramCtrl'
-  navbarProvider.add '/vdiagram', 'Diagram', 33
+  navbarProvider.add '/vdiagram', 'Diagram', 34
 
 ng.controller 'DiagramCtrl', ->
-  createDiagramEditor('vdiagram')
-    .addNode 50, 50, 'Oscillator 1',
-      in: ['Frequency','Timbre','Modulation']
-      out: ['Waveform']
-    .addNode 50, 180, 'Oscillator 2',
-      in: ['Frequency','Shape']
-      out: ['Waveform']
-    .addNode 275, 100, 'Mixer',
-      in: ['#Inputs']
-      out: ['Waveform']
-    .addNode 480, 100, 'Player',
-      in: ['Waveform']
+  diagram = createDiagramEditor('vdiagram')
+    .addNode
+      id: 1
+      name: 'Oscillator'
+      x: 50
+      y: 50
+      pads:
+        'frequency': {}
+        'timbre': {}
+        'modulation': {}
+        'waveform':
+          wires:
+            3: ['inmix']
+    .addNode
+      id: 2
+      name: 'Oscillator'
+      x: 50
+      y: 180
+      pads:
+        'frequency': {}
+        'shape': {}
+        'waveform':
+          wires:
+            3: ['inmix']
+    .addNode
+      id: 3
+      name: 'Mixer'
+      x: 275
+      y: 100
+      pads:
+        'inmix': { multi: true }
+        'waveform':
+          wires:
+            4: ['waveform']
+    .addNode
+      id: 4
+      name: 'Player'
+      x: 480
+      y: 100
+      pads:
+        'waveform': {}
+    .wireItUp()
+    
+  diagram.onAddWire = (from, to) ->
+    console.log 'added', from.node.name, from.name, '>', to.node.name, to.name
+
+  diagram.onRemoveWire = (from, to) ->
+    console.log 'removed', from.node.name, from.name, '>', to.node.name, to.name
+    
+  # setTimeout ->
+  #   diagram.removeNode 3
+  # , 3000

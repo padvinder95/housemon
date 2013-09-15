@@ -1,280 +1,263 @@
-# adapted from https://github.com/ryanwmoore/JsDataFlowEditor
+# Diagram Editor built on top of Raphael.js
+# -jcw, 2013-09-15
+#
+# inspired by https://github.com/ryanwmoore/JsDataFlowEditor
 # which was forked from https://github.com/daeken/JsDataFlowEditor
-# looks like the bezier code came from http://raphaeljs.com/graffle.{html,js}
 
-window.createDiagramEditor = (domid, width, height) ->
-  anchor = selectedNode = null
-  paper = Raphael domid, width, height
+omit = (array, item) ->
+  i = array.indexOf item
+  array.splice i, 1  if i >= 0
 
-  allowConnection = (point) ->
+window.createDiagramEditor = (domid) ->
+  paper = Raphael domid
 
-    start = (x, y, e) ->
-      if not point.multi and point.connections.length
-        anchor = point.connections[0]
-        point.removeTo anchor
-      else
-        anchor = point
+  addWire = (from, to, onRemoved) ->
+    # Don't create duplicate connections between pads
+    for wid in from.wireIds
+      wire = paper.getById wid
+      if wire.data('from') is from and wire.data('to') is to
+        return
 
-      @cursor = paper.circle(e.offsetX, e.offsetY, 3).toFront()
-      @line = addConnection anchor.circle, @cursor, 'white', 'black|3'
+    # Add to the output wire list, if not yet present
+    toNodeId = to.node.id
+    from.wires ?= {}
+    wires = from.wires[toNodeId] ?= []
+    wires.push to.name  unless to.name in wires
 
-    move = (dx, dy) ->
-      @cursor.transform ['T', dx, dy]
-      addConnection @line.from, @line.to, @line
+    # Create the path, and associate it with both pads for future redrawing
+    wire = paper.path().toBack()
+      .attr
+        stroke: 'darkblue', 'stroke-width': 3
+        path: generatePath(from.eltId, to.eltId)
+      .data
+        from: from, to: to
 
-    end = ->
-      @cursor.remove()
-      removeConnection @line
+    wid = wire.id
+    from.wireIds.push wid
+    to.wireIds.push wid
 
-    point.circle.drag move, start, end
+    wire.dblclick (e) ->
+      removeWire wid
+      onRemoved wid
 
-    point.circle.mouseup (e) ->
-      unless point.dir is anchor.dir or point.parent is anchor.parent
-        anchor.connectTo point
+    wire
 
-  addConnection = (obj1, obj2, line, bg, removeHook) ->
-    path = generatePath obj1, obj2
-    if line and line.line
-      line.bg?.attr path: path
-      line.line.attr path: path
+  removeWire = (wid) ->
+    wire = paper.getById wid
+    from = wire.data 'from'
+    omit from.wireIds, wid
+    to = wire.data 'to'
+    omit to.wireIds, wid
+    toNodeId = to.node.id
+    omit from.wires[toNodeId], to.name
+    delete from.wires[toNodeId]  unless from.wires[toNodeId].length
+    delete from.wires  unless Object.keys(from.wires).length
+    wire.remove()
+
+  # Magnetic line direction, adapted from http://raphaeljs.com/graffle.{html,js}
+  generatePath = (id1, id2) ->
+    obj1 = paper.getById id1
+    obj2 = paper.getById id2
+    bb1 = obj1.getBBox()
+    bb2 = obj2.getBBox()
+    p = [
+      { x: bb1.x + bb1.width / 2, y: bb1.y - 1              }
+      { x: bb1.x + bb1.width / 2, y: bb1.y + bb1.height + 1 }
+      { x: bb1.x - 1,             y: bb1.y + bb1.height / 2 }
+      { x: bb1.x + bb1.width + 1, y: bb1.y + bb1.height / 2 }
+      { x: bb2.x + bb2.width / 2, y: bb2.y - 1              }
+      { x: bb2.x + bb2.width / 2, y: bb2.y + bb2.height + 1 }
+      { x: bb2.x - 1,             y: bb2.y + bb2.height / 2 }
+      { x: bb2.x + bb2.width + 1, y: bb2.y + bb2.height / 2 }
+    ]
+    d = {}
+    dis = []
+    for i in [0..3]
+      for j in [4..7]
+        dx = Math.abs(p[i].x - p[j].x)
+        dy = Math.abs(p[i].y - p[j].y)
+        if (i is j - 4) or
+            (((i isnt 3 and j isnt 6) or
+             p[i].x < p[j].x) and ((i isnt 2 and j isnt 7) or
+              p[i].x > p[j].x) and ((i isnt 0 and j isnt 5) or
+               p[i].y > p[j].y) and ((i isnt 1 and j isnt 4) or
+                p[i].y < p[j].y))
+          dis.push dx + dy
+          d[dis[dis.length - 1]] = [i, j]
+    if dis.length
+      res = d[Math.min dis...]
     else
-      color = (if typeof line is 'string' then line else 'black')
-      lineElem = paper.path(path)
-      bgElem = (if (bg and bg.split) then paper.path(path) else null)
-      if removeHook?
-        dblclick = (e) ->
-          (e.originalEvent or e).preventDefault()
-          removeHook()
-          lineElem.remove()
-          bgElem?.remove()
-        lineElem.dblclick dblclick
-        bgElem?.dblclick dblclick
-        
-      line: lineElem.toBack().attr
-        stroke: color
-        fill: 'none'
-      bg: bg?.split and bgElem.toBack().attr
-        stroke: bg.split('|')[0]
-        fill: 'none'
-        'stroke-width': bg.split('|')[1] or 3
-      from: obj1
-      to: obj2
+      res = [0, 4]
+    x1 = p[res[0]].x
+    y1 = p[res[0]].y
+    x4 = p[res[1]].x
+    y4 = p[res[1]].y
+    dx = Math.max(Math.abs(x1 - x4) / 2, 10)
+    dy = Math.max(Math.abs(y1 - y4) / 2, 10)
+    x2 = [x1, x1, x1 - dx, x1 + dx][res[0]].toFixed(3)
+    y2 = [y1 - dy, y1 + dy, y1, y1][res[0]].toFixed(3)
+    x3 = [0, 0, 0, 0, x4, x4, x4 - dx, x4 + dx][res[1]].toFixed(3)
+    y3 = [0, 0, 0, 0, y1 + dy, y1 - dy, y4, y4][res[1]].toFixed(3)
+    [
+      'M', x1.toFixed(3), y1.toFixed(3)
+      'C', x2, y2, x3, y3, x4.toFixed(3), y4.toFixed(3)
+    ]
 
-  removeConnection = (connection) ->
-    connection.line?.remove()
-    connection.bg?.remove()
+  nodes: {}   # all nodes in this diagram, mapped from their unique id
+  groups: {}  # the set of Raphael elements representing a node on-screen
 
-  class Node
-    constructor: (x, y, name, conns) ->
-      @group = paper.set()
-      @pads = []
+  addNode: (node) ->
+    context = @ # FIXME: should use events, see makeConnectable/end/addWire
+    {id,name,x,y,pads} = node
+    @nodes[id] = node
+    group = @groups[id] = paper.set()
 
-      suppressSelect = false
-      inputs = conns.in
-      outputs = conns.out
+    circles = [] # will add this to group after making the rest draggable
+    height = 0
+    layout =
+      in: { elements: [], count: 0, width: 0 }
+      out: { elements: [], count: 0, width: 0 }
 
-      for input in inputs ? []
-        @addPoint input, 'in', input[0] is '#'
-      for output in outputs ? []
-        @addPoint output, 'out'
-      
+    makeDraggable = (set) ->
       cx = cy = null
 
       start = ->
         cx = cy = 0
+        set.toFront()
         
-      move = (dx, dy) =>
-        @group.translate dx - cx, dy - cy
+      move = (dx, dy, x, y) ->
+        set.translate dx - cx, dy - cy
         cx = dx
         cy = dy
-        suppressSelect = true
-        @group.toFront()
-        p.fixConnections() for p in @pads
-        paper.safari()
+        redrawWires()
 
-      height = 0
-      info =
-        in: { elements: [], count: 0, width: 0 }
-        out: { elements: [], count: 0, width: 0 }
+      redrawWires = ->
+        for padName, pad of pads
+          for wid in pad.wireIds ? []
+            wire = paper.getById wid
+            wire.attr path: generatePath wire.data('from').eltId,
+                                          wire.data('to').eltId
 
-      # Create Raphael elements for all the parts of this node
-      for p in @pads
-        label = p.label = paper.text x, y, p.label
-        label.attr fill: 'black', 'font-size': 12
-        circle = p.circle = paper.circle x, y, 7.5
-        circle.attr stroke: 'black', fill: 'white'
-        bbox = label.getBBox()
-        height = bbox.height
-        width = bbox.width
+      set.drag move, start, null, rect, rect
 
-        e = info[p.dir]
-        e.elements.push { label, width, circle }
-        e.count += 1
-        e.width = bbox.width  if bbox.width > e.width
+    makeConnectable = (elt, pad) ->
+      cursor = line = null
+      elt.data 'pad', pad
 
-        @group.push label, circle.toFront()
-        allowConnection p
+      start = (x, y, e) ->
+        # if not point.multi and point.connections.length
+        #   anchor = point.connections[0]
+        #   point.removeTo anchor
+        cursor = paper.circle e.offsetX, e.offsetY, 3
+        cursor.toFront().attr stroke: 'red', fill: 'red'
+        line = paper.path()
 
-      # The name shown at the top of the node
-      title = paper.text(x, y, name)
-      title.attr fill: 'black', 'font-size': 16, 'font-weight': 'bold'
-      bbox = title.getBBox()
+      move = (dx, dy) ->
+        cursor.transform ['T', dx, dy]
+        line.attr
+          stroke: 'red', 'stroke-width': 3
+          path: generatePath elt.id, cursor.id
 
-      # Total dimensions, now that all the pieces are known
-      count = Math.max info.in.count, info.out.count
-      nHeight = 8 + bbox.height + count * (height + 5)
-      nWidth = 60 + Math.max(50, bbox.width, info.in.width + info.out.width)
-      
-      # The actual node rectangle and separator line
-      rect = paper.rect(x, y, nWidth, nHeight, 6)
-      rect.attr fill: '#eef', 'fill-opacity': 0.9
-      line = paper.path ['M', x, y + bbox.height + 2, 'l', nWidth, 0]
-      line.attr 'stroke-width', 0.25
+      end = (e) ->
+        cursor.remove()
+        line.remove()
+        toElt = paper.getElementByPoint e.x, e.y
+        toPad = toElt?.data 'pad'
+        if toPad and pad.dir isnt toPad.dir and pad.node isnt toPad.node
+          if pad.dir is 'in'
+            [pad,toPad] = [ toPad, pad ] # exchange the two pads
+          wire = addWire pad, toPad, ->
+            context.onRemoveWire? pad, toPad
+          if wire
+            context.onAddWire? pad, toPad
 
-      # Insert the rectangle, separator line, and title at the front
-      @group.splice 0, 0, rect.toBack(), line, title
+      elt.drag move, start, end
 
-      # Move all the parts to their proper coordinates
-      title.translate nWidth / 2, bbox.height / 2 + 1.5
-      for dir, column of info
-        pos = 14 + bbox.height + (count - column.count) / 2 * (height + 5)
-        column.elements.forEach (e) ->
-          switch dir
-            when 'in'
-              e.circle.translate 12, pos
-              e.label.translate 22 + e.width / 2, pos
-            when 'out'
-              e.circle.translate nWidth - 12, pos
-              e.label.translate nWidth - 22 - e.width / 2, pos
-          e.label.drag move, start, null, rect, rect
-          pos += height + 5
+    # Create Raphael elements for all the parts of this node
+    for padName, pad of pads
+      pad.node = node
+      pad.name = padName
+      pad.dir = if pad.wires then 'out' else 'in'
+      pad.multi = true  if pad.wires # outputs can always multi-connect
 
-      # Node selection and deselection
-      rect.click =>
-        if suppressSelect is true
-          suppressSelect = false
-        else if @ is selectedNode
-          @blur()
-        else
-          @focus()
+      label = paper.text(x, y, padName).attr 'font-size': 12
+      group.push label
 
-      # Dragging nodes around (see also the label drag calls above)
-      title.drag move, start, null, rect, rect
-      rect.drag move, start
+      circle = paper.circle(x, y, 7.5).attr fill: 'white'
+      circles.push circle
+      makeConnectable circle, pad
 
-    remove: ->
-      @blur()  if @ is selectedNode
-      @group.remove()
-      p.remove()  for p in @pads
+      pad.eltId = circle.id
+      pad.wireIds = []
 
-    addPoint: (label, dir, multi) ->
-      @pads.push new Pad(@, label, dir, multi)
+      bbox = label.getBBox()
+      height = bbox.height
+      width = bbox.width
+
+      dir = if pad.wires then 'out' else 'in'
+      e = layout[dir]
+      e.elements.push { label, width, circle }
+      e.count += 1
+      e.width = bbox.width  if bbox.width > e.width
+
+    # The name shown at the top of the node
+    title = paper.text x, y, name
+    title.attr 'font-size': 16, 'font-weight': 'bold'
+    bbox = title.getBBox()
+
+    # Total dimensions, now that all the pieces are known
+    count = Math.max layout.in.count, layout.out.count
+    nHeight = 8 + bbox.height + count * (height + 5)
+    nWidth = 60 + Math.max(50, bbox.width, layout.in.width + layout.out.width)
     
-    focus: ->
-      selectedNode?.blur()  unless @ is selectedNode
-      selectedNode = @
-      @group.toFront()
-      rect = @group[0]
-      rect.attr 'stroke-width', 3
+    # The actual node rectangle and separator line
+    rect = paper.rect x, y, nWidth, nHeight, 6
+    rect.attr fill: '#eef', 'fill-opacity': 0.9
+    sep = paper.path ['M', x, y + bbox.height + 2, 'l', nWidth, 0]
+    sep.attr 'stroke-width', 0.25
 
-    blur: ->
-      selectedNode = null
-      rect = @group[0]
-      rect.attr 'stroke-width', 1
+    # Move all the parts to their proper coordinates
+    title.translate nWidth / 2, bbox.height / 2 + 1.5
+    for dir, column of layout
+      pos = 14 + bbox.height + (count - column.count) / 2 * (height + 5)
+      column.elements.forEach (e) ->
+        switch dir
+          when 'in'
+            e.circle.translate 12, pos
+            e.label.translate 22 + e.width / 2, pos
+          when 'out'
+            e.circle.translate nWidth - 12, pos
+            e.label.translate nWidth - 22 - e.width / 2, pos
+        pos += height + 5
 
-  class Pad
-    constructor: (@parent, @label, @dir, @multi) ->
-      @multi ?= dir is 'out'
-      @connections = []
-      @lines = []
-    
-    remove: ->
-      for connection in @connections
-        @connection.removeTo @, true
-      for line in @lines
-        removeConnection @line
-
-    connectTo: (other, sub) ->
-      unless sub
-        unless @canConnect() and other.canConnect()
-          return
-      @connections.push other
-      @circle.attr fill: 'lightgray'
-      unless sub
-        remove = =>
-          @removeTo other
-          paper.safari()
-        other.connectTo @, true
-        line = addConnection @circle, other.circle, 'blue', 'black|3', remove
-        @lines.push line
-        other.lines.push line
-
-    removeTo: (other, sub) ->
-      for i of @connections
-        if @connections[i] is other
-          @connections.splice i, 1
-          unless sub
-            other.removeTo @, true
-            removeConnection @lines[i]
-          @lines.splice i, 1
-          break
-      @circle.attr fill: 'white'  unless @connections.length
-
-    canConnect: ->
-      @multi or @connections.length is 0
-
-    fixConnections: ->
-      for line in @lines
-        addConnection line.from, line.to, line
-      paper.safari()
-
-  addNode: (args...) ->
-    new Node args...
+    # Insert the rectangle, separator line, and title at the front
+    group.splice 0, 0, rect.toBack(), sep, title
+    makeDraggable group
+    group.push circles... # these too get dragged, but they can't start one
     @
 
-# Magic, this code was adapted from http://raphaeljs.com/graffle.{html,js}
-generatePath = (obj1, obj2) ->
-  bb1 = obj1.getBBox()
-  bb2 = obj2.getBBox()
-  p = [
-    { x: bb1.x + bb1.width / 2, y: bb1.y - 1              }
-    { x: bb1.x + bb1.width / 2, y: bb1.y + bb1.height + 1 }
-    { x: bb1.x - 1,             y: bb1.y + bb1.height / 2 }
-    { x: bb1.x + bb1.width + 1, y: bb1.y + bb1.height / 2 }
-    { x: bb2.x + bb2.width / 2, y: bb2.y - 1              }
-    { x: bb2.x + bb2.width / 2, y: bb2.y + bb2.height + 1 }
-    { x: bb2.x - 1,             y: bb2.y + bb2.height / 2 }
-    { x: bb2.x + bb2.width + 1, y: bb2.y + bb2.height / 2 }
-  ]
-  d = {}
-  dis = []
-  for i in [0..3]
-    for j in [4..7]
-      dx = Math.abs(p[i].x - p[j].x)
-      dy = Math.abs(p[i].y - p[j].y)
-      if (i is j - 4) or
-          (((i isnt 3 and j isnt 6) or
-           p[i].x < p[j].x) and ((i isnt 2 and j isnt 7) or
-            p[i].x > p[j].x) and ((i isnt 0 and j isnt 5) or
-             p[i].y > p[j].y) and ((i isnt 1 and j isnt 4) or
-              p[i].y < p[j].y))
-        dis.push dx + dy
-        d[dis[dis.length - 1]] = [i, j]
-  if dis.length
-    res = d[Math.min dis...]
-  else
-    res = [0, 4]
-  x1 = p[res[0]].x
-  y1 = p[res[0]].y
-  x4 = p[res[1]].x
-  y4 = p[res[1]].y
-  dx = Math.max(Math.abs(x1 - x4) / 2, 10)
-  dy = Math.max(Math.abs(y1 - y4) / 2, 10)
-  x2 = [x1, x1, x1 - dx, x1 + dx][res[0]].toFixed(3)
-  y2 = [y1 - dy, y1 + dy, y1, y1][res[0]].toFixed(3)
-  x3 = [0, 0, 0, 0, x4, x4, x4 - dx, x4 + dx][res[1]].toFixed(3)
-  y3 = [0, 0, 0, 0, y1 + dy, y1 - dy, y4, y4][res[1]].toFixed(3)
-  [
-    'M', x1.toFixed(3), y1.toFixed(3)
-    'C', x2, y2, x3, y3, x4.toFixed(3), y4.toFixed(3)
-  ]
+  removeNode: (id) ->
+    for padName, pad of @nodes[id]?.pads ? {}
+      for wid in pad.wireIds.slice() # using a copy because of self-deletion
+        removeWire wid
+    @groups[id]?.forEach (elt) ->
+      elt.remove()
+    delete @groups[id]
+    delete @nodes[id]
+    @
+
+  wireItUp: ->
+    context = @
+    for id, node of @nodes
+      for padName, pad of node.pads
+        for toNodeId, toPadNames of pad.wires ? []
+          toInfo = @nodes[toNodeId]
+          for to in toPadNames
+            toPad = toInfo.pads[to]
+            do (pad, toPad) ->
+              addWire pad, toPad, ->
+                context.onRemoveWire? pad, toPad
+    @
+
+  # onAddWire: (from, to) ->
+  # onRemoveWire: (from, to) ->
