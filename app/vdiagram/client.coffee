@@ -39,7 +39,7 @@ ng.controller 'DiagramCtrl', ->
       x: 275
       y: 100
       pads:
-        'inmix': { multi: true }
+        'inmix': {}
         'waveform':
           wires:
             4: ['waveform']

@@ -40,6 +40,8 @@ window.createDiagramEditor = (domid) ->
       removeWire wid
       onRemoved wid
 
+    updatePadState from
+    updatePadState to
     wire
 
   removeWire = (wid) ->
@@ -53,6 +55,13 @@ window.createDiagramEditor = (domid) ->
     delete from.wires[toNodeId]  unless from.wires[toNodeId].length
     delete from.wires  unless Object.keys(from.wires).length
     wire.remove()
+    updatePadState from
+    updatePadState to
+
+  updatePadState = (pad) ->
+    fill = if pad.wireIds.length then 'lightgray' else 'white'
+    elt = paper.getById pad.eltId
+    elt.attr fill: fill
 
   # Magnetic line direction, adapted from http://raphaeljs.com/graffle.{html,js}
   generatePath = (id1, id2) ->
@@ -145,9 +154,6 @@ window.createDiagramEditor = (domid) ->
       elt.data 'pad', pad
 
       start = (x, y, e) ->
-        # if not point.multi and point.connections.length
-        #   anchor = point.connections[0]
-        #   point.removeTo anchor
         cursor = paper.circle e.offsetX, e.offsetY, 3
         cursor.toFront().attr stroke: 'red', fill: 'red'
         line = paper.path()
@@ -178,7 +184,6 @@ window.createDiagramEditor = (domid) ->
       pad.node = node
       pad.name = padName
       pad.dir = if pad.wires then 'out' else 'in'
-      pad.multi = true  if pad.wires # outputs can always multi-connect
 
       label = paper.text(x, y, padName).attr 'font-size': 12
       group.push label
