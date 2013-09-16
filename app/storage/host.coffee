@@ -3,8 +3,10 @@ module.exports = (app, plugin) ->
 
 setupDatabase = (path) ->
   level = require 'level'
+  nulldel = require 'level-nulldel'
 
-  db = level path, {}, (err) ->
+  # the "nulldel" adds support for treating puts of null values as deletions
+  db = nulldel level path, {}, (err) ->
     throw err  if err
     if true
       # console.log 'db opened', db.db.getProperty 'leveldb.stats'
