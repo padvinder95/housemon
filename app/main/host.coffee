@@ -25,7 +25,7 @@ module.exports = (app, plugin) ->
     Parser = @registry.pipe.parser
     Dispatcher = @registry.pipe.dispatcher
     ReadingLog = @registry.sink.readinglog
-    Status = @registry.sink.status
+    StatusTable = @registry.sink.statustable
     createLogStream = @registry.source.logstream
 
     app.db.on 'put', (key, val) ->
@@ -33,7 +33,7 @@ module.exports = (app, plugin) ->
     app.db.on 'batch', (array) ->
       console.log 'db#', array.length
       for x in array
-        console.log '', x.key, '=', x.value
+        console.log ' ', x.key, '=', x.value
       
     readings = createLogStream('app/replay/20121130.txt.gz')
       .pipe(new Replayer)
@@ -44,7 +44,7 @@ module.exports = (app, plugin) ->
       .pipe(new ReadingLog app.db)
 
     readings
-      .pipe(new Status app.db)
+      .pipe(new StatusTable app.db)
 
     jeelink = new Serial('usb-A900ad5m').on 'open', ->
 
