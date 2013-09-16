@@ -1,12 +1,10 @@
-module.exports = (app, plugin) ->
-  app.db = setupDatabase './storage'
+level = require 'level'
+nulldel = require 'level-nulldel'
+stream = require 'stream'
 
 setupDatabase = (path) ->
-  level = require 'level'
-  nulldel = require 'level-nulldel'
-
   # the "nulldel" adds support for treating puts of null values as deletions
-  db = nulldel level path, {}, (err) ->
+  db = nulldel level path, { valueEncoding: 'json' }, (err) ->
     throw err  if err
     if true
       # console.log 'db opened', db.db.getProperty 'leveldb.stats'
@@ -58,4 +56,43 @@ setupDatabase = (path) ->
     .on 'end', ->
       cb result
 
+  # convert del events into put events, to match nulldel behaviour
+  db.on 'del', (key) -> db.emit 'put', key
+
   db
+
+class ReadingLog extends stream.Writable
+  constructor: (@db) ->
+    super objectMode: true
+
+  _write: (data, encoding, done) ->
+    if data?
+      {type,tag,time,msg} = data
+      if type? and tag? and time? and msg?
+        key = "reading~#{type}~#{tag}~#{time}"
+        @db.put key, msg, done
+      else
+        console.warn 'reading log data ignored', data
+        done()
+
+class Status extends stream.Writable
+  constructor: (@db) ->
+    super objectMode: true
+
+  _write: (data, encoding, done) ->
+    if data?
+      {type,tag,time,msg} = data
+      if type? and tag? and time? and msg?
+        batch = @db.batch()
+        for name, value of msg
+          key = "#{type} #{tag} #{name}"
+          batch.put "status~#{key}", { key, value, type, tag, time }
+        batch.write done
+      else
+        console.warn 'status data ignored', data
+        done()
+
+module.exports = (app, plugin) ->
+  app.db = setupDatabase './storage'
+  app.register 'sink.readinglog', ReadingLog
+  app.register 'sink.status', Status

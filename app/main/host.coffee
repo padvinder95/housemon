@@ -24,25 +24,34 @@ module.exports = (app, plugin) ->
     Serial = @registry.interface.serial
     Parser = @registry.pipe.parser
     Dispatcher = @registry.pipe.dispatcher
+    ReadingLog = @registry.sink.readinglog
+    Status = @registry.sink.status
     createLogStream = @registry.source.logstream
 
-    createLogStream('app/replay/20121130.txt.gz')
+    app.db.on 'put', (key, val) ->
+      console.log 'db:', key, '=', val
+    app.db.on 'batch', (array) ->
+      console.log 'db#', array.length
+      for x in array
+        console.log '', x.key, '=', x.value
+      
+    readings = createLogStream('app/replay/20121130.txt.gz')
       .pipe(new Replayer)
       .pipe(new Parser)
       .pipe(new Dispatcher)
-      .on 'data', (data) ->
-        console.log 'd18:', data
-      .on 'error', (err) ->
-        console.log 'x40', err
 
-    new Serial('usb-A900ad5m')
-      .on 'open', ->
-        @
+    readings
+      .pipe(new ReadingLog app.db)
+
+    readings
+      .pipe(new Status app.db)
+
+    jeelink = new Serial('usb-A900ad5m').on 'open', ->
+
+      jeelink # log raw data to file, as timestamped lines of text
           .pipe(new Logger) # sink, can't chain this further
-        @
+
+      jeelink # log decoded readings as entries in the database
           .pipe(new Parser)
           .pipe(new Dispatcher)
-          .on 'data', (data) ->
-            console.log 'RF12 out:', data
-          .on 'error', (err) ->
-            console.log 'e81', err
+          .pipe(new ReadingLog app.db)

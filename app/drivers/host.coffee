@@ -11,11 +11,12 @@ module.exports = (app, plugin) ->
       
     _transform: (data, encoding, done) ->
       # locate the proper driver, or set a new one up
-      name = registry.nodemap[data.type]
+      type = data.type
+      name = registry.nodemap[type]
       unless drivers[name]
         driverProto = registry.driver?[name]
         unless driverProto?.decode
-          console.log "driver (#{data.type})", data.msg
+          console.log "driver (#{type})", data.msg
           return done()
         drivers[name] = Object.create driverProto
       
@@ -26,7 +27,7 @@ module.exports = (app, plugin) ->
           data.tag = msg.tag
           delete msg.tag # TODO: prefer a shallow copy?
         else
-          delete data.tag
+          data.tag = type
         data.type = name
         data.msg = msg
         @push data
