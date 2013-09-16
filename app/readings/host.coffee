@@ -24,7 +24,7 @@ class StatusTable extends stream.Writable
       if type? and tag? and time? and msg?
         batch = @db.batch()
         for name, value of msg
-          key = "#{type} #{tag} #{name}"
+          key = "#{type}/#{tag}/#{name}"
           batch.put "status~#{key}", { key, value, type, tag, time }
         batch.write done
       else

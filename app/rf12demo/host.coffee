@@ -16,7 +16,7 @@ lineEventParser = (dev) ->
   (emitter, buffer) ->
     emit = (type, part) ->
       if type is 'data' # probably always true
-        part = { dev: dev, msg: part }
+        part = { dev: dev, msg: part, time: Date.now() }
       emitter.emit type, part
     origParser { emit }, buffer
 
@@ -31,7 +31,7 @@ class Parser extends stream.Transform
       tokens = msg.split ' '
       if tokens.shift() is 'OK'
         nodeId = tokens[0] & 0x1F
-        prefix = if @config then "#{@config.band}:#{@config.group}:" else ''
+        prefix = if @config then "#{@config.band},#{@config.group}," else ''
         data.type = "rf12-#{prefix}#{nodeId}"
         data.msg = Buffer(tokens)
         @push data
