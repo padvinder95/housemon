@@ -17,11 +17,12 @@ dateFilename = (now) ->
   path + "/#{d}.txt"
 
 timeString = (now) ->
+  date = new Date(now)
   # first construct the value as 10 digits
-  digits = now.getUTCMilliseconds() + 1000 *
-          (now.getUTCSeconds() + 100 *
-          (now.getUTCMinutes() + 100 *
-          (now.getUTCHours() + 100)))
+  digits = date.getUTCMilliseconds() + 1000 *
+          (date.getUTCSeconds() + 100 *
+          (date.getUTCMinutes() + 100 *
+          (date.getUTCHours() + 100)))
   # then massage it as a string to get the punctuation right
   digits.toString().replace /.(..)(..)(..)(...)/, '$1:$2:$3.$4'
 
@@ -42,8 +43,7 @@ class Logger extends stream.Writable
         @fd = fs.openSync logname, 'a'
       # L 01:02:03.537 usb-A40117UK OK 9 25 54 66 235 61 210 226 33 19
       {time,dev,msg} = data
-      time ?= now.getTime()
-      msg = "L #{timeString new Date(time)} #{dev} #{msg}\n"
+      msg = "L #{timeString time ? now} #{dev} #{msg}\n"
       fs.write @fd, Buffer(msg), 0, msg.length, null, done
     else
       fs.closeSync @fd  if @fd?
