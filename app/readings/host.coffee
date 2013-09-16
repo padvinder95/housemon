@@ -25,7 +25,7 @@ class StatusTable extends stream.Writable
         batch = @db.batch()
         for name, value of msg
           key = "#{type}/#{tag}/#{name}"
-          batch.put "status~#{key}", { key, value, type, tag, time }
+          batch.put "status~#{key}", { key, name, value, type, tag, time }
         batch.write done
       else
         console.warn 'status table data ignored', data
