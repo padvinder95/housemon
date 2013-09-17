@@ -1,9 +1,11 @@
 module.exports = (app, plugin) ->
 
   plugin.server = (primus) ->
-    setInterval ->
+    ticker = ->
       primus.write Date.now()
-    , 5000
+      setTimeout ticker, 60000
+    primus.once 'connection', ->
+      setTimeout ticker, 1000 # TODO: why is this delay needed?
 
   plugin.client = (primus) ->
     primus.transform 'incoming', (packet) ->
