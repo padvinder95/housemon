@@ -3,7 +3,7 @@
 
 ng = angular.module 'myApp'
 
-ng.run ($rootScope) ->
+ng.run ($rootScope, primus) ->
 
   primus.on 'open', (arg) ->
     $rootScope.$apply -> $rootScope.serverConnection = 'open'

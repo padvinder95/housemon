@@ -2,7 +2,7 @@ Q = require 'q'
 Connection = require 'q-connection'
 
 module.exports = (app, plugin) ->
-  app.rpc = {}
+  app.host = {}
 
   # can't use "app.on 'setup'" here because that would be too late
   plugin.server = (primus) ->
@@ -16,9 +16,9 @@ module.exports = (app, plugin) ->
       spark.on 'rpc', (arg) ->
         port.onmessage data: arg
 
-      qc = Connection port, app.rpc
+      qc = Connection port, app.host
       spark.client = (args...) ->
         qc.invoke args...
 
   plugin.client = (primus) ->
-    primus.rpc = {}
+    primus.client = {}

@@ -1,6 +1,6 @@
 ng = angular.module 'myApp'
 
-ng.factory 'rpc', ($q, $rootScope) ->
+ng.factory 'host', ($q, $rootScope, primus) ->
   port =
     postMessage: (message) ->
       primus.write ['rpc', message]
@@ -10,7 +10,7 @@ ng.factory 'rpc', ($q, $rootScope) ->
     port.onmessage data: arg
 
   Connection = require 'q-connection'
-  qc = Connection port, primus.rpc
+  qc = Connection port, primus.client
   
   (args...) ->
     q = $q.defer()

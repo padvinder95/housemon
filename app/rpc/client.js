@@ -6,7 +6,7 @@
 
   ng = angular.module('myApp');
 
-  ng.factory('rpc', function($q, $rootScope) {
+  ng.factory('host', function($q, $rootScope, primus) {
     var Connection, port, qc;
     port = {
       postMessage: function(message) {
@@ -20,7 +20,7 @@
       });
     });
     Connection = require('q-connection');
-    qc = Connection(port, primus.rpc);
+    qc = Connection(port, primus.client);
     return function() {
       var args, q;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
