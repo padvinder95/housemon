@@ -20,7 +20,7 @@
       });
     });
     Connection = require('q-connection');
-    qc = Connection(port, primus.api);
+    qc = Connection(port, primus.rpc);
     return function() {
       var args, q;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];

@@ -1,15 +1,11 @@
 ng = angular.module 'myApp'
 
 ng.config ($stateProvider, navbarProvider) ->
-  $stateProvider
-    .state 'view2',
-      url: '/view2'
-      templateUrl: 'view2/view.html'
-      controller: 'View2Ctrl'
+  $stateProvider.state 'view2',
+    url: '/view2'
+    templateUrl: 'view2/view.html'
+    controller: 'View2Ctrl'
   navbarProvider.add '/view2', 'View2', 12
-  
-  primus.api.view2_twice = (x) ->
-    2 * x
 
 ng.controller 'View2Ctrl', ($scope, rpc) ->
   $scope.counter = rpc 'view2_next'

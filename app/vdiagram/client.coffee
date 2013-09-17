@@ -1,11 +1,10 @@
 ng = angular.module 'myApp'
 
 ng.config ($stateProvider, navbarProvider) ->
-  $stateProvider
-    .state 'diagram',
-      url: '/vdiagram'
-      templateUrl: 'vdiagram/view.html'
-      controller: 'DiagramCtrl'
+  $stateProvider.state 'diagram',
+    url: '/vdiagram'
+    templateUrl: 'vdiagram/view.html'
+    controller: 'DiagramCtrl'
   navbarProvider.add '/vdiagram', 'Diagram', 34
 
 ng.controller 'DiagramCtrl', ->

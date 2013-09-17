@@ -1,7 +1,7 @@
 module.exports = (app, plugin) ->
 
   plugin.server = (primus) ->
-    app.api.broadcast = primus.write.bind primus
+    app.rpc.broadcast = primus.write.bind primus
     
     primus.on 'connection', (spark) ->
       spark.on 'data', (arg) ->

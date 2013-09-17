@@ -10,7 +10,7 @@ ng.factory 'rpc', ($q, $rootScope) ->
     port.onmessage data: arg
 
   Connection = require 'q-connection'
-  qc = Connection port, primus.api
+  qc = Connection port, primus.rpc
   
   (args...) ->
     q = $q.defer()

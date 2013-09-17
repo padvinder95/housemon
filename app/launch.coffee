@@ -7,10 +7,10 @@ module.exports = (app) ->
     console.info "server listening on port :#{@config.port}"
 
   # debugging: log all app.emit calls
-  appEmit = app.emit
-  app.emit = (args...) ->
-    console.log 'appEmit', args
-    appEmit.apply @, args
+  # appEmit = app.emit
+  # app.emit = (args...) ->
+  #   console.log 'appEmit', args
+  #   appEmit.apply @, args
 
   app.registry = {}
 
