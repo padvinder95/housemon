@@ -1,5 +1,7 @@
 module.exports = (app, plugin) ->
   
-  counter = 0
-  app.api.next = ->
-    ++counter
+  app.on 'setup', ->
+
+    counter = 0
+    app.api.view2_next = ->
+      ++counter

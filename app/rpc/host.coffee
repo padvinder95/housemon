@@ -1,3 +1,4 @@
+Q = require 'q'
 Connection = require 'q-connection'
 
 module.exports = (app, plugin) ->
@@ -16,8 +17,11 @@ module.exports = (app, plugin) ->
 
       spark.remote = Connection port, app.api
 
-      spark.remote.invoke('twice', 123) # defined in view2
-        .then (res) -> console.log 'double', res
+      spark.remote.invoke('view2_twice', 123)
+        .then (res) ->
+          console.log 'double', res
+        .fail (err) ->
+          console.log 'rpc twice fail', err
 
   plugin.client = (primus) ->
     primus.api = {}

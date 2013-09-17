@@ -1,2 +1,2 @@
-client.js: rpc.coffee
+client.js: client.coffee
 	browserify -c 'coffee -cs' $^ >$@

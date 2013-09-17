@@ -31,7 +31,7 @@ setupDatabase = (path) ->
   # the dumb approach of scanning all keys to find the prefixes won't work for
   # lots of keys, we nned to skip over each prefix found when filling the list
   db.getPrefixDetails = (cb) ->
-    result = []
+    result = {}
 
     # use a recursive function to handle the asynchronous callbacks
     iterator = (key) ->

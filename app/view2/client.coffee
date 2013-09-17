@@ -7,16 +7,12 @@ ng.config ($stateProvider, navbarProvider) ->
       templateUrl: 'view2/view.html'
       controller: 'View2Ctrl'
   navbarProvider.add '/view2', 'View2', 12
+  
+  primus.api.view2_twice = (x) ->
+    2 * x
 
-ng.run ->
-  primus.api.twice = (x) -> 2 * x
-
-ng.controller 'View2Ctrl', ($q, $scope, rpc) ->
-  deferred = $q.defer()
-  rpc.invoke('next')
-    .then (res) ->
-      deferred.resolve res
-  $scope.counter = deferred.promise
+ng.controller 'View2Ctrl', ($scope, rpc) ->
+  $scope.counter = rpc 'view2_next'
 
 ng.filter 'interpolate', (appInfo) ->
   (text) ->
