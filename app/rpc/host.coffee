@@ -17,7 +17,7 @@ module.exports = (app, plugin) ->
         port.onmessage data: arg
 
       qc = Connection port, app.rpc
-      spark.rpc = (args...) ->
+      spark.client = (args...) ->
         qc.invoke args...
 
   plugin.client = (primus) ->
