@@ -1,6 +1,13 @@
 h3 Status
+
 table
-  tr(ng-repeat='row in status') {{row}}
+  tr
+    th Driver
+    th Origin
+    th Name
+    th Value
+    th Time
+  tr(ng-repeat='row in status | orderBy:"key"')
     td {{row.type}}
     td {{row.tag}}
     td {{row.name}}
