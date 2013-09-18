@@ -17,4 +17,17 @@ ng.controller 'Status', ($scope, primus, host) ->
   $scope.lookup = (row) ->
     info[row.type]?.out?[row.name] ? {}
 
+  $scope.niceValue = (row) ->
+    {scale,factor} = info[row.type]?.out?[row.name] ? {}
+
+    value = row.value
+    if factor
+      value *= factor
+    if scale < 0
+      value *= Math.pow 10, -scale
+    else if scale >= 0
+      value /= Math.pow 10, scale
+      value = value.toFixed scale
+    value
+
 ng.factory 'driverInfo', (host) ->

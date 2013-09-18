@@ -16,6 +16,6 @@ table
     td {{row.tag}}
     td {{row.name}}
     td {{lookup(row).title}}
-    td(align='right') {{row.value}}
+    td(align='right') {{niceValue(row)}}
     td {{lookup(row).unit}}
     td {{row.time | date:"MM-dd &nbsp; HH:mm:ss"}}
