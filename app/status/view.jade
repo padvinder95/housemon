@@ -12,7 +12,7 @@ table
     th Unit
     th Time
   tr(ng-repeat='row in status | filter:shared.statusQuery | orderBy:"key" track by row.key'
-                highlight-on-change='{{row.time}}')
+                highlight-on-change='row.time')
     td {{row.type}}
     td {{row.tag}}
     td {{row.name}}

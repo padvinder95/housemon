@@ -36,6 +36,6 @@ ng.controller 'Status', ($scope, primus, host) ->
 
 ng.directive 'highlightOnChange', ($animate) ->
   link: (scope, elem, attrs) ->
-    attrs.$observe 'highlightOnChange', ->
+    scope.$watch attrs.highlightOnChange, ->
       $animate.addClass elem, 'highlight', ->
-        $animate.removeClass elem, 'highlight'
+        attrs.$removeClass 'highlight'

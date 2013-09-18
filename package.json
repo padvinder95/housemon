@@ -15,5 +15,14 @@
   },
   "dependencies": {
     "primus-live": "~0.3.2"
+  },
+  "devDependencies": {
+    "chai": "~1.7.2",
+    "mocha": "~1.13.0",
+    "sinon": "~1.7.3",
+    "coffee-script": "~1.6.3"
+  },
+  "scripts": {
+    "test": "mocha"
   }
 }
