@@ -15,7 +15,11 @@ ng.controller 'Status', ($scope, primus, host) ->
     $scope.status = primus.live $scope, 'status'
 
   $scope.lookup = (row) ->
-    info[row.type]?.out?[row.name] ? {}
+    out = info[row.type]?.out
+    # If out is an array, the we must use the tag (without optional '-' suffix)
+    if out? and Array.isArray out
+      out = info[row.type]?[row.tag.replace /-.*/, '']
+    out?[row.name] ? {}
 
   $scope.niceValue = (row) ->
     {scale,factor} = info[row.type]?.out?[row.name] ? {}
