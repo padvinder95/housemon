@@ -8,12 +8,4 @@ ng.config ($stateProvider, navbarProvider) ->
   navbarProvider.add '/status', 'Status', 61
 
 ng.controller 'Status', ($scope, primus) ->
-  $scope.status = {}
-
-  primus.write ['live', 'status']
-  $scope.$on 'live.status', (event, type, value) ->
-    switch type
-      when 'put'
-        $scope.status[value.key] = value
-      when 'del'
-        delete $scope.status[value]
+  $scope.status = primus.live $scope, 'status'
