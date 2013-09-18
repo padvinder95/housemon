@@ -14,11 +14,13 @@ ng.controller 'Status', ($scope, primus, host) ->
     info = result
     $scope.status = primus.live $scope, 'status'
 
+  # FIXME: this gets called far too often, memoise?
   $scope.lookup = (row) ->
     out = info[row.type]?.out
-    # If out is an array, the we must use the tag (without optional '-' suffix)
+    # If out is an array, then lookup via the tag (without optional '-' suffix)
     if out? and Array.isArray out
-      out = info[row.type]?[row.tag.replace /-.*/, '']
+      subtype = row.tag.replace /-.*/, ''
+      out = info[row.type]?[subtype]
     out?[row.name] ? {}
 
   $scope.niceValue = (row) ->
