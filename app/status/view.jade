@@ -1,0 +1,8 @@
+h3 Status
+table
+  tr(ng-repeat='row in status') {{row}}
+    td {{row.type}}
+    td {{row.tag}}
+    td {{row.name}}
+    td(align='right') {{row.value}}
+    td {{row.time | date:"MM-dd &nbsp; HH:mm:ss"}}

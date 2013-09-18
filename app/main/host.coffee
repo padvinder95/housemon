@@ -28,12 +28,12 @@ module.exports = (app, plugin) ->
     StatusTable = @registry.sink.statustable
     createLogStream = @registry.source.logstream
 
-    app.db.on 'put', (key, val) ->
-      console.log 'db:', key, '=', val
-    app.db.on 'batch', (array) ->
-      console.log 'db#', array.length
-      for x in array
-        console.log ' ', x.key, '=', x.value
+    # app.db.on 'put', (key, val) ->
+    #   console.log 'db:', key, '=', val
+    # app.db.on 'batch', (array) ->
+    #   console.log 'db#', array.length
+    #   for x in array
+    #     console.log ' ', x.key, '=', x.value
       
     readings = createLogStream('app/replay/20121130.txt.gz')
       .pipe(new Replayer)

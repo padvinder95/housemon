@@ -62,3 +62,37 @@ setupDatabase = (path) ->
 
 module.exports = (app, plugin) ->
   app.db = setupDatabase './storage'
+
+  # generate "top-level" events for changes, so that we can hook in per-prefix
+  emitOnPrefix = (key, value) ->
+    prefix = key.replace /~.*/, ''
+    key = key.substr(prefix.length+1)
+    value = JSON.parse value  if value?[0] is '{'
+    app.emit "db.#{prefix}", key, value
+
+  app.db.on 'put', emitOnPrefix
+  app.db.on 'batch', (array) ->
+    emitOnPrefix x.key, x.value  for x in array
+
+  # capture all requests to set up a live feed
+  app.on 'running', (primus) ->
+    primus.on 'connection', (spark) ->
+      spark.on 'live', (prefix) ->
+        console.info 'replay', prefix
+        livePrefix = "live.#{prefix}"
+
+        app.db.createValueStream
+          start: prefix + "~"
+          end: prefix + "~~"
+          valueEncoding: 'json'
+        .on 'data', (data) ->
+          spark.write [livePrefix, 'put', data]
+        .on 'end', ->
+          console.info 'live', prefix
+
+          app.on "db.#{prefix}", (key, value) ->
+            if value?
+              if key is value.key
+                spark.write [livePrefix, 'put', value]
+            else
+              spark.write [livePrefix, 'del', key]
