@@ -1,6 +1,6 @@
 h3 Status
 
-input(type='text',ng-model='query',placeholder='Search...')
+input(type='text',ng-model='shared.statusQuery',placeholder='Search...')
 
 table
   tr
@@ -11,11 +11,12 @@ table
     th Value
     th Unit
     th Time
-  tr.repeat-item(ng-repeat='row in status | filter:query | orderBy:"key"')
+  tr(ng-repeat='row in status | filter:shared.statusQuery | orderBy:"key" track by row.key'
+                highlight-on-change='{{row.time}}')
     td {{row.type}}
     td {{row.tag}}
     td {{row.name}}
-    td {{lookup(row).title}}
-    td(align='right') {{niceValue(row)}}
-    td {{lookup(row).unit}}
+    td {{row.title}}
+    td(align='right') {{row.value}}
+    td {{row.unit}}
     td {{row.time | date:"MM-dd &nbsp; HH:mm:ss"}}

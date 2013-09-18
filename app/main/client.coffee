@@ -20,6 +20,7 @@ ng.config ($urlRouterProvider, $locationProvider) ->
   
 ng.run ($rootScope, appInfo) ->
   $rootScope.appInfo = appInfo
+  $rootScope.shared = {}
   
 ng.controller 'NavCtrl', ($scope, navbar) ->
   $scope.navbar = navbar

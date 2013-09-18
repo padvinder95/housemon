@@ -8,32 +8,34 @@ ng.config ($stateProvider, navbarProvider) ->
   navbarProvider.add '/status', 'Status', 61
 
 ng.controller 'Status', ($scope, primus, host) ->
-  info = {}
+  host('status_driverinfo').then (info) ->
 
-  host('status_driverinfo').then (result) ->
-    info = result
-    $scope.status = primus.live $scope, 'status'
+    # FIXME: this may get called a bit too often, memoise?
+    lookup = (row) ->
+      out = info[row.type]?.out
+      # If out is an array, then lookup via tag (without optional '-' suffix)
+      if out? and Array.isArray out
+        subtype = row.tag.replace /-.*/, ''
+        out = info[row.type]?[subtype]
+      out?[row.name] ? {}
 
-  # FIXME: this gets called far too often, memoise?
-  $scope.lookup = (row) ->
-    out = info[row.type]?.out
-    # If out is an array, then lookup via the tag (without optional '-' suffix)
-    if out? and Array.isArray out
-      subtype = row.tag.replace /-.*/, ''
-      out = info[row.type]?[subtype]
-    out?[row.name] ? {}
+    $scope.status = primus.live $scope, 'status', (row) ->
+      rowInfo = lookup row
 
-  $scope.niceValue = (row) ->
-    {scale,factor} = info[row.type]?.out?[row.name] ? {}
+      row.title = rowInfo.title
+      row.unit = rowInfo.unit
+      row.origVal = row.value
 
-    value = row.value
-    if factor
-      value *= factor
-    if scale < 0
-      value *= Math.pow 10, -scale
-    else if scale >= 0
-      value /= Math.pow 10, scale
-      value = value.toFixed scale
-    value
+      if rowInfo.factor
+        row.value *= rowInfo.factor
+      if rowInfo.scale < 0
+        row.value *= Math.pow 10, -rowInfo.scale
+      else if rowInfo.scale >= 0
+        row.value /= Math.pow 10, rowInfo.scale
+        row.value = row.value.toFixed rowInfo.scale
 
-ng.factory 'driverInfo', (host) ->
+ng.directive 'highlightOnChange', ($animate) ->
+  link: (scope, elem, attrs) ->
+    attrs.$observe 'highlightOnChange', ->
+      $animate.addClass elem, 'highlight', ->
+        $animate.removeClass elem, 'highlight'
