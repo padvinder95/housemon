@@ -35,7 +35,7 @@ ng.controller 'Status', ($scope, primus, host) ->
         row.value = row.value.toFixed rowInfo.scale
 
 ng.directive 'highlightOnChange', ($animate) ->
-  link: (scope, elem, attrs) ->
+  (scope, elem, attrs) ->
     scope.$watch attrs.highlightOnChange, ->
       $animate.addClass elem, 'highlight', ->
         attrs.$removeClass 'highlight'

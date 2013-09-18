@@ -7,8 +7,11 @@
   -o-transition 1s linear all
   transition 1s linear all
 
+// the !important mark helps overrule the odd/even gray background
+// TODO: the effect is still not perfect on top of gray, though
+
 .highlight-add
-  background lighten(yellow, 75%)
+  background lighten(yellow, 75%) !important
 
 .highlight-add.highlight-add-active
-  background white
+  background white !important
