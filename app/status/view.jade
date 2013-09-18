@@ -1,15 +1,21 @@
 h3 Status
 
+pre {{info}}
+
 table
   tr
     th Driver
     th Origin
     th Name
+    th Title
     th Value
+    th Unit
     th Time
   tr(ng-repeat='row in status | orderBy:"key"')
     td {{row.type}}
     td {{row.tag}}
     td {{row.name}}
+    td {{lookup(row).title}}
     td(align='right') {{row.value}}
+    td {{lookup(row).unit}}
     td {{row.time | date:"MM-dd &nbsp; HH:mm:ss"}}
