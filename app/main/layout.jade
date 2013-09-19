@@ -25,14 +25,16 @@ html(lang='en')
           li.myNav
             a(href='/admin') Admin
 
-    .row
-      .small-12.large-12.columns(ui-view)
+    div(ui-view)
 
-    .secondary.label
-      | Version 
-      span(app-version)
-    .label Connection: {{serverConnection}}
-    .secondary.label @ {{ serverTick | date:'HH:mm:ss' }}
+    .row
+      .large-9.columns
+        p.secondary.label
+          | Version 
+          span(app-version)
+      .large-3.columns
+        .label Conn: {{serverConnection}}
+        .secondary.label @ {{ serverTick | date:'HH:mm:ss' }}
 
     block scripts
       script.

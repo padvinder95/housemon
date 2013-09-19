@@ -1,8 +1,10 @@
-h3 Storage use
-table
-  tr
-    th Prefix
-    th Size
-  tr(ng-repeat='(prefix,size) in hello')
-    td {{prefix}}
-    td(align='right') ≈ {{size}} b
+.row
+  .large-12.columns
+      h3 Storage use
+      table
+        tr
+          th Prefix
+          th Size
+        tr(ng-repeat='(prefix,size) in hello')
+          td {{prefix}}
+          td(align='right') ≈ {{size}} b

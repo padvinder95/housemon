@@ -1,10 +1,12 @@
-p This is the partial for Diagram.
+.row
+  .large-9.columns
+    p#vdiagram(style='border: 1px solid lightgray; height: 400px;')
 
-p#vdiagram(style='border: 1px solid lightgray; height: 400px;')
+  .large-3.columns
+    :markdown
+      **Notes**
 
-p
-  :markdown
-    * drag an output to an input to connect or vice-versa
-    * double-click on a line to break the connection again
-    * can't' create/delete nodes, nor load/save this, it's a hard-coded trial
-    * adding and removing lines is now tracked in the data structure
+      * Drag an output to an input to connect or vice-versa.
+      * Double-click on a line to break the connection again.
+      * Can't' create/delete nodes, nor load/save this, it's a hard-coded trial.
+      * Adding and removing lines is now tracked in the data structure.
