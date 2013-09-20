@@ -1,10 +1,18 @@
 extends main/layout
 
 prepend styles
-  link(rel='stylesheet',href='/normalize-css/normalize.css')
   link(rel='stylesheet',href='/bower-foundation-css/foundation.css')
+  script(src='/foundation/js/vendor/custom.modernizr.js')
 
 prepend scripts
+  script.
+    document.write('<script src=/foundation/js/vendor/'
+      + ('__proto__' in {} ? 'zepto' : 'jquery')
+      + '.js><\/script>');
+  script(src='/foundation/js/foundation/foundation.js')
+  script(src='/foundation/js/foundation/foundation.topbar.js')
+  script.
+    $(document).foundation();
   script(src='/angular/angular.js')
   script(src='/angular-animate/angular-animate.js')
   script(src='/angular-ui-router/release/angular-ui-router.js')
