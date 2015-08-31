@@ -55,8 +55,8 @@ ss.server.once 'ready', ->
 # load and route both default to "/title-in-lowercase" if title is set
 
 routes = [
-  # { title: 'Home', controller: 'HomeCtrl', route: '/' }
-  { title: 'Dash', controller: 'DashCtrl', route: '/'}
+  { title: 'Home', controller: 'HomeCtrl', route: '/' }
+  { title: 'Dash', controller: 'DashCtrl', route: '/dash'}
   { title: 'Admin', controller: 'AdminCtrl' }
   { title: 'Docs', controller: 'DocsCtrl' , route: '/docs'}
 ]
