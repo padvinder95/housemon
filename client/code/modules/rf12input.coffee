@@ -33,8 +33,8 @@ module.exports = (ng) ->
       #TODO: move these to configuration sub-system
       $scope.writeDefaults =
         band: 868
-        group: 212
-        node: 0
+        group: 136
+        node: 31
         header: 0 
 
 

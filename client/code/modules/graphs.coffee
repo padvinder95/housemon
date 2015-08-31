@@ -66,7 +66,7 @@ module.exports = (ng) ->
       graph = new Dygraph 'chart'
 
       $scope.setGraph = (key) ->
-        period = ($scope.hours or 1) * 3600000
+        period = ($scope.hours or 4) * 3600000
         promise = rpc.exec 'host.api', 'rawRange', key, -period, 0
         promise.then (values) ->
           return  unless values
@@ -89,7 +89,7 @@ module.exports = (ng) ->
             connectSeparatedPoints: true
 
       # TODO open page with fixed choice, for testing convenience only
-      $scope.setGraph 'meterkast - Usage house'
+      $scope.setGraph 'meterkast - Usage'
 
       $scope.$on 'aset.status', (event, obj, oldObj) ->
         if obj.key is lastKey

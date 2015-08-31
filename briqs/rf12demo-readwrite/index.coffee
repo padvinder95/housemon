@@ -18,7 +18,7 @@
 module.exports =
 
   info:
-    name: 'rf12demo-readwrite'
+    name: 'rf12demo-readwrite-bak'
     description: 'Read/Write Serial interface for a device (e.g JeeNode) running a RF12demo.10+ compatible sketches.'
     descriptionHtml: 'Read/Write interface for <b>RF12Demo.10+</b> compatible devices.<br/>For JNu please check/amend baud rate.<br/>Additional settings are available once installed.<br/>For more information click the [about] link above.'
     author: 'lightbulb'
