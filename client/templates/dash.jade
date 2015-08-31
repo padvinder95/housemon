@@ -6,7 +6,16 @@
   .six.columns
     h2 Thermostat
     p Control the thermostat
-    p {{foo}}
+    input(type='range',min='140',max='240',step="5",ng-model='temperature')
+    label {{ temperature/10 }} &deg;C
+    input(type='button',ng-click='setTemperature()',value='Set temp')
   .six.columns
     h2 leds
     p Control the leds upstairs
+    input(type='range',min='0',max='1024',ng-model='intensity')
+    label intensity: {{intensity}}
+    input(type='button',ng-click='setLeds()',value='Set leds')
+
+.row
+  .twelve.columns
+    p {{writeResult}}
