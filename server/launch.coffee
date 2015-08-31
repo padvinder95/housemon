@@ -11,6 +11,8 @@ ss = require 'socketstream'
 _ = require 'underscore'
 fs = require 'fs'
 semver = require 'semver'
+morgan = require 'morgan'
+body_parser = require 'body-parser'
 
 # FIXME added check because engineStrict in package.json is not working (why?)
 nodeIsTooOld = ->
@@ -70,12 +72,12 @@ if ss.env is 'production'
 else
   # show request log in dev mode
   # see http://www.senchalabs.org/connect/middleware-logger.html
-  ss.http.middleware.prepend ss.http.connect.logger 'dev'
+  ss.http.middleware.prepend morgan 'dev'
 
 # support uploads, this will generate an 'upload' event with details
 # TODO clean up files if this was not done by any event handlers
 require('fs').mkdir './uploads', ->
-ss.http.middleware.prepend ss.http.connect.bodyParser
+ss.http.middleware.prepend body_parser
   uploadDir: './uploads'
 ss.http.middleware.prepend (req, res, next) ->
   state.emit 'upload', req.url, req.files  unless _.isEmpty req.files
@@ -83,8 +85,8 @@ ss.http.middleware.prepend (req, res, next) ->
 
 # TODO find a way to put this code inside briqs, the logger briq in this case
 # support downloads from the "logger/" folder
-ss.http.middleware.append '/logger', ss.http.connect.directory './logger'
-ss.http.middleware.append '/logger', ss.http.connect.static './logger'
+# ss.http.middleware.append '/logger', ss.http.connect.directory './logger'
+# ss.http.middleware.append '/logger', ss.http.connect.static './logger'
 
 # Start web server
 server = http.Server ss.http.middleware
