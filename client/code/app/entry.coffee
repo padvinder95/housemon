@@ -45,7 +45,12 @@ ss.server.once 'ready', ->
       app.value 'routes', routes
 
       console.info 'require', paths
-      require(path) app  for path in paths
+      for path in paths
+        if path == "/main"
+          require("#{path}") app
+        else
+          require("../modules#{path}") app
+      # require(path) app  for path in paths
 
       console.info 'ng bootstrap'
       angular.bootstrap document, ['app']
