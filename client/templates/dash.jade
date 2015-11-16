@@ -12,6 +12,8 @@
   .six.columns
     h2 leds
     p Control the leds upstairs
+    input(type='range',min='0',max='255',ng-model='dT')
+    label &Delta;t: {{ 10*dT }} s
     input(type='range',min='0',max='1024',ng-model='intensity')
     label intensity: {{intensity}}
     input(type='button',ng-click='setLeds()',value='Set leds')
